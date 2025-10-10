@@ -1,0 +1,17 @@
+{
+	"@comment": "Note that the code to transform these data into a webpage is in https://github.com/Schnark/schnark.github.io",
+	"title": {
+		"en": "SparrowSurf – App for Firefox OS",
+		"de": "SparrowSurf – App für Firefox OS"
+	},
+	"serviceworker": false,
+	"icon": "res/icons/icon128.png",
+	"screenshots": [
+		"1.png",
+		"2.png"
+	],
+	"desc": {
+		"en": ["SparrowSurf is a small browser intended as a substitute where the default browser on FFOS fails.", "By default JS is disabled, and you can also disable CSS to view pages that are broken otherwise. For some important sites additional CSS is injected to improve them.", "Please note that this is an early release. You are welcome to report all bugs and deficiencies you notice."],
+		"de": ["SparrowSurf ist ein kleiner Browser, der als Ersatz für die Fälle gedacht ist, in denen der Standard-Browser auf FFOS versagt.", "Standardmäßig ist JS deaktiviert, und du kannst auch CSS deaktivieren um Seiten zu betrachten, die sonst defekt sind. Auf einigen wichtigen Websites wird zusätzliches CSS eingefügt um die Darstellung zu verbessern.", "Bitte beachte, dass es sich um eine frühe Veröffentlichung handelt. Unterrichte mich gerne über alle Fehler und Mängel, die dir auffallen."]
+	}
+}

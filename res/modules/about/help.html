@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SparrowSurf Help</title>
+<meta name="viewport" content="width=device-width">
+<style>
+html {
+	font: 16px sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+	html {
+		color: #fff;
+		background: #333;
+	}
+}
+</style>
+</head><body>
+<h1>SparrowSurf Help</h1>
+<h2>First steps</h2>
+<p>Before you can start browsing you have to select a CORS proxy in the preferences. Tap the top bar to open them and scroll down to the general preferences. There you can select a proxy. Note that the provider of this proxy can monitor which pages you view.</p>
+<p>While you are there you can also review and adapt the other preferences.</p>
+
+<h2>Features</h2>
+<p>SparrowSurf is mainly meant as a substitute browser for pages that don’t properly show in the default browser in FFOS. There are problems in two different areas: Some sites use certificates unknown to FFOS (in most cases you can accept the certificate manually, but there are some cases where this does not work or where embedded ressources don’t load), and some sites rely on modern JS or CSS and break in older browsers.</p>
+<p>SparrowSurf addresses these problems by loading some (or if necessary: all) content via a proxy and by modifying sites to remove all JS by default and optionally also all CSS. For some important sites special CSS is added to fix issues.</p>
+<p>SparrowSurf can also remove images, videos and other things to save bandwidth and make pages load faster. In future versions it will be possible to store pages for offline usage.</p>
+
+<h2>Restrictions</h2>
+<p>Because of its design, SparrowSurf has some restrictions:</p>
+<ul>
+<li>Pages cannot properly use cookies, so some sites will not work and you will not be able to log into any accounts.</li>
+<li>Pages can only load via GET, so forms that use POST will not work. (In a few cases SparrowSurf will use GET for some forms instead.)</li>
+<li>Redirects are only poorly supported.</li>
+<li>Due to changed paths some JS and some web fonts will not work correctly, but by default they are disabled anyway.</li>
+<li>An attacker could read your bookmarks, history etc. with a specially crafted page. This is unlikely, but not impossible.</li>
+</ul>
+<p>Any other problems are probably bugs and you should report them to me.</p>
+<p>You can also tell me about important sites that could benefit from some additional CSS or JS to fix problems. For example if you regularly visit a page where a menu hides some part of the content because it should be hidden by JS code that does not work, I can add additional CSS to hide that menu or perhaps even some JS code to properly toggle it.</p>
+<p>Alternatively you can simply disable CSS for such a site, which will make it readable in most cases. If things are really bad you could also try to add <code>view-source:</code> in front of the URL to see the page as HTML source code.</p>
+
+<h2>Usage</h2>
+<p>Using SparrowSurf should be self-explanatory in most cases. Tap the top bar to show or hide the settings. From there you have access to:</p>
+<p><b>Navigation bar:</b> Go back or forward, reload the current page, show the history for the current tab (to go back or forward by more than one step), (un)bookmark the current page, share it or open it in another browser.</p>
+<p><b>URL bar:</b> Enter a new URL. You can search through the top pages, your bookmarks, the history, or start a web search.</p>
+<p><b>Tabs:</b> Open a new tab, switch to another tab already open or close them.</p>
+<p><b>General preferences:</b> Change the default preferences for all sites.</p>
+<p><b>Site preferences:</b> Change the preferences for the current site, overriding the general defaults.</p>
+
+<h2>Future plans</h2>
+<p>Some features I plan for the future:</p>
+<ul>
+<li>Add additional CSS/JS for more pages to fix small problems.</li>
+<li>Show favicons.</li>
+<li>Allow editing bookmark titles, search engines, removing history entries.</li>
+<li>Add a context menu to open links in a new tab, download images, etc.; allow zooming pages.</li>
+<li>Allow saving pages offline.</p>
+</ul>
+<p>I also have some more ideas. If you also have some additional wishes feel free to tell me about them.</p>
+</body></html>

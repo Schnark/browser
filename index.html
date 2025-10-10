@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>SparrowSurf</title>
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="res/browser.css">
+<script src="res/lib/polyfill.js" defer></script>
+<script src="res/storage.js" defer></script>
+<script src="res/options.js" defer></script>
+<script src="res/lru.js" defer></script>
+<script src="res/get-blob.js" defer></script>
+<script src="res/modify.js" defer></script>
+<script src="res/get-doc.js" defer></script>
+<script src="res/tab.js" defer></script>
+<script src="res/settings.js" defer></script>
+<script src="res/modules/defs.js" defer></script>
+<script src="res/modules.js" defer></script>
+<script src="res/browser.js" defer></script>
+<script src="res/init.js" defer></script>
+<link rel="icon" type="image/png" sizes="512x512" href="res/icons/icon512.png">
+<link rel="icon" type="image/svg+xml" sizes="any" href="icon.svg">
+</head><body>
+<div class="titlebar"></div>
+<div class="content">
+<div class="tabs"></div>
+<div class="settings">
+<div class="history-buttons">
+<p><button class="history-back">←</button> <button class="history-forward">→</button> <button class="history-reload">↺</button> <button class="history-show">⇆</button> <button class="bookmark-add">☆</button> <button class="bookmark-remove">★</button> <button class="url-share"><svg width="24" height="24"><path fill="none" stroke="currentcolor" stroke-width="2" d="M 19,5 L 5,12 L 19,19" /><g fill="currentcolor" stroke="none"><circle cx="19" cy="5" r="4" /><circle cx="5" cy="12" r="4" /><circle cx="19" cy="19" r="4" /></g></svg></button> <button class="url-browse">↗</button></p>
+<ol class="history-list url-list"></ol>
+</div>
+
+<form class="url-form"><p>
+<input class="url-input"><button>→</button>
+</p></form>
+<p class="suggestion-buttons"><button class="suggestions-top">Top</button> <button class="suggestions-bookmarks">Bookmarks</button> <button class="suggestions-history">History</button> <button class="suggestions-search">Search</button></p>
+<ol class="suggestion-list url-list"></ol>
+
+<h2>Tabs</h2>
+<p><button class="new-tab">New tab</button></p>
+<ol class="tab-list url-list"></ol>
+
+<h2>General preferences</h2>
+<form class="prefs">
+<p><label>Proxy: <select class="prefs-proxy-url-list">
+<!--for a list see also my app Firri-->
+<optgroup label="Suggested proxies">
+<option value="https://corsproxy.io/?">corsproxy.io</option>
+<option value="https://api.codetabs.com/v1/proxy/?quest=%">api.codetabs.com</option>
+<option value="https://api.cors.lol/?url=">api.cors.lol</option>
+</optgroup>
+<optgroup label="For testing only">
+<option value="https://cors-anywhere.herokuapp.com/">cors-anywhere.herokuapp.com</option><!--requires opt-in-->
+<option value="https://proxy.cors.sh/">proxy.cors.sh</option>
+<option value="https://cors.eu.org/">cors.eu.org</option>
+<option value="https://cors-anywhere.com/">cors-anywhere.com</option>
+</optgroup>
+<optgroup label="Manual selection">
+<option value="">Own proxy</option>
+</optgroup>
+</select></label><br>
+<input type="url" class="prefs-proxy-url"></p>
+<p><label><input type="checkbox" class="prefs-cors"> Avoid proxy for sites known to work without</label></p>
+<p><label><input type="checkbox" class="prefs-cert"> Use proxy for all content on sites known to use a certificate unknown in FFOS</label></p>
+<p><label>Images and media:<br><select class="prefs-img-media">
+<option value="000">Remove</option>
+<option value="100">Keep images, remove media</option>
+<option value="111">Keep, but do not autoplay media</option>
+<option value="101">Keep without changes</option>
+</select></label></p>
+<p><label><input type="checkbox" class="prefs-dark"> Prefer dark scheme</label></p>
+<p><button>Apply</button></p></form>
+
+<div class="prefs-site-container">
+<h2 class="with-subtitle">Site preferences</h2>
+<p>for <span class="prefs-site-site"></span></p>
+<form class="prefs-site">
+<p><label>Proxy: <select class="prefs-site-proxy-url-list">
+<option value="about:default">Use default proxy</option>
+<optgroup label="Suggested proxies">
+<option value="https://corsproxy.io/?">corsproxy.io</option>
+<option value="https://api.codetabs.com/v1/proxy/?quest=%">api.codetabs.com</option>
+<option value="https://api.cors.lol/?url=">api.cors.lol</option>
+</optgroup>
+<optgroup label="For testing only">
+<option value="https://cors-anywhere.herokuapp.com/">cors-anywhere.herokuapp.com</option>
+<option value="https://proxy.cors.sh/">proxy.cors.sh</option>
+<option value="https://cors.eu.org/">cors.eu.org</option>
+<option value="https://cors-anywhere.com/">cors-anywhere.com</option>
+</optgroup>
+<optgroup label="Manual selection">
+<option value="">Own proxy</option>
+</optgroup>
+</select></label><br>
+<input type="url" class="prefs-site-proxy-url"></p>
+<p><label><input type="checkbox" class="prefs-site-proxy"> Use proxy for all content</label></p>
+<p><label><input type="checkbox" class="prefs-site-html"> Enable frames</label></p>
+<p><label><input type="checkbox" class="prefs-site-js"> Enable JS</label></p>
+<p><label><input type="checkbox" class="prefs-site-css"> Enable CSS</label></p>
+<p><label>Images and media:<br><select class="prefs-site-img-media">
+<option value="">Use general preference</option>
+<option value="000">Remove</option>
+<option value="100">Keep images, remove media</option>
+<option value="111">Keep, but do not autoplay media</option>
+<option value="101">Keep without changes</option>
+</select></label></p>
+<p><label><input type="checkbox" class="prefs-site-font"> Enable downloadable fonts</label></p>
+<p><label>Color scheme:<br><select class="prefs-site-dark">
+<option value="">Use general preference</option>
+<option value="0">Prefer light scheme</option>
+<option value="1">Prefer dark scheme</option>
+</select></label></p>
+<p><button>Apply</button></p></form>
+</div>
+
+</div>
+</div>
+</body></html>

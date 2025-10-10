@@ -1,0 +1,268 @@
+html {
+	font-family: sans-serif;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+label,
+input,
+select,
+button {
+	font: inherit;
+}
+
+button:not(:disabled) {
+	cursor: pointer;
+}
+
+.titlebar {
+	font-weight: bold;
+	text-align: center;
+	height: 2em;
+	line-height: 2em;
+	padding: 0.5em 2em 0.25em;
+	border-bottom: groove black 0.25em;
+	cursor: pointer;
+	background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"><path d="M2,4 L18,4 M2,12 L18,12 M2,20 L18,20" stroke="black" stroke-width="4" stroke-linecap="round" /></svg>') right center no-repeat;
+}
+
+.titlebar.settings-shown {
+	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"><path d="M2,4 L18,20 M2,20 L18,4" stroke="black" stroke-width="4" stroke-linecap="round" /></svg>');
+}
+
+.titlebar div {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.content {
+	height: calc(100% - 3em);
+	position: relative;
+}
+
+.tabs {
+	height: 100%;
+}
+
+.tabs iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	border: 0;
+	background-color: #fff;
+}
+
+.settings {
+	background-color: #fff;
+	position: absolute;
+	top: 0;
+	bottom: 100%;
+	left: 0;
+	right: 0;
+	padding: 0 0.75em;
+	overflow: hidden;
+	transition: bottom 0.3s;
+}
+
+.settings.visible {
+	overflow: auto;
+	bottom: 0;
+}
+
+.with-subtitle {
+	margin-bottom: 0;
+}
+
+.with-subtitle ~ p {
+	margin-top: 0.2em;
+}
+
+.url-list {
+	margin: 0.5em 0;
+	padding: 0;
+}
+
+.url-list li {
+	display: block;
+	border: solid thin;
+	border-radius: 0.25em;
+	margin: 0.25em 0;
+	padding: 0.25em;
+	position: relative;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.url-list li.current {
+	border-width: medium;
+}
+
+.url-list li .title {
+	font-weight: bold;
+}
+
+.url-list li .url {
+	font-size: 90%;
+}
+
+.history-buttons p {
+	background-color: #000;
+	margin: 0 -0.75em;
+	padding: 0 0.75em;
+}
+
+.history-buttons button {
+	background: none;
+	color: #fff;
+	font-size: 150%;
+	border: none;
+	border-radius: 0;
+	margin: 0;
+	padding: 0.3em;
+}
+
+.history-buttons button:disabled {
+	color: #aaa;
+}
+
+.history-buttons button.bookmark-remove {
+	color: #ff0;
+}
+
+.url-input {
+	font: inherit;
+	width: calc(100% - 2em);
+	height: 2em;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	vertical-align: middle;
+	padding: 0.25em;
+	border: solid #000 0.2em;
+	border-right: none;
+	border-radius: 0.5em 0 0 0.5em;
+}
+
+.url-input ~ button {
+	font: inherit;
+	width: 2em;
+	height: 2em;
+	display: inline-block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	vertical-align: middle;
+	border: solid #000 0.2em;
+	border-left: none;
+	border-radius: 0 0.5em 0.5em 0;
+	background: #000;
+	color: #fff;
+}
+
+.url-input:focus {
+	border-color: #00f;
+}
+
+.url-input:focus ~ button {
+	background: #00f;
+	border-color: #00f;
+}
+
+.history-list {
+	margin-top: 0;
+}
+
+.history-list li {
+	margin: 0;
+	border-radius: 0;
+}
+
+.suggestion-buttons {
+	margin-bottom: 0;
+}
+
+.suggestion-buttons button {
+	background: #fff;
+	color: #000;
+	border: solid thin;
+	border-bottom-width: 1px;
+	padding: 0.3em 0.5em 0.1em;
+	border-radius: 0.25em 0.25em 0 0;
+}
+
+.suggestion-buttons button.selected {
+	border-bottom-color: #fff;
+}
+
+.suggestion-list {
+	margin-top: -1px;
+	border-top: solid 1px;
+}
+
+.suggestion-list li {
+	margin: 0;
+	border-top: none;
+	border-radius: 0;
+}
+
+.suggestion-list:empty::after {
+	display: block;
+	content: "no suggestions";
+	font-style: italic;
+	font-size: 90%;
+	border: solid thin;
+	border-top: none;
+	padding: 0.25em;
+}
+
+.tab-list li {
+	padding-right: 3em;
+}
+
+.tab-list li button {
+	padding: 0.3em 0.75em;
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border: 0;
+	border-radius: 0;
+	background: #800;
+	color: #fff;
+	font-weight: bold;
+}
+
+/*dark mode*/
+.dark-mode {
+	background: #222;
+	color: #fff;
+}
+
+.dark-mode .settings {
+	background-color: #222;
+}
+
+.dark-mode .suggestion-buttons button {
+	background-color: #222;
+	color: #fff;
+}
+
+.dark-mode .suggestion-buttons button.selected {
+	border-bottom-color: #222;
+}
+
+.dark-mode .titlebar {
+	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"><path d="M2,4 L18,4 M2,12 L18,12 M2,20 L18,20" stroke="white" stroke-width="4" stroke-linecap="round" /></svg>');
+}
+
+.dark-mode .titlebar.settings-shown {
+	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"><path d="M2,4 L18,20 M2,20 L18,4" stroke="white" stroke-width="4" stroke-linecap="round" /></svg>');
+}

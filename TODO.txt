@@ -1,0 +1,18 @@
+For future versions
+
+* improve interface, esp. icons, form elements
+* loading indicator; allow aborting loading a page
+* allow editing bookmark title
+* allow editing search engines
+* allow removing history entries
+* handle favicons in some way
+* rightclick to open link in new tab, download image etc.; zoom
+* easy access to view source
+* allow saving pages offline
+* allow pages to add extra links (e.g. xkcd.com -> explainxkcd.com)
+* build some pages from an API (e.g. Wikipedia)
+* add more CSS for important sites
+* include DevDocs
+* support JS version of DDG
+* support Ecosia
+* support Google, YouTube

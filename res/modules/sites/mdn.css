@@ -1,0 +1,8 @@
+[data-open="false"] {
+	display: none;
+}
+
+.page-layout__header,
+.navigation {
+	position: static;
+}

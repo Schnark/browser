@@ -1,0 +1,9 @@
+html {
+	font: 16px sans-serif;
+}
+
+img,
+audio,
+video {
+	max-width: 100%;
+}

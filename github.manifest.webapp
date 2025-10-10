@@ -1,0 +1,53 @@
+{
+	"version": "0.1",
+	"name": "SparrowSurf",
+	"description": "simple browser",
+	"size": 47637,
+	"package_path": "https://schnark.github.io/browser/browser.zip",
+	"icons": {
+		"128": "/res/icons/icon128.png",
+		"512": "/res/icons/icon512.png"
+	},
+	"developer": {
+		"name": "Michael Müller",
+		"url": "https://github.com/Schnark"
+	},
+	"default_locale": "en",
+	"permissions": {
+		"storage": {
+			"description": "Storage without size limitations"
+		}
+	},
+	"activities": {
+		"view": {
+			"href": "/index.html",
+			"filters": {
+				"type": "url",
+				"url": {
+					"required": true,
+					"pattern": "https?://.*",
+					"regexp": "^https?://"
+				},
+				"sparrowsurf": {
+					"pattern": "[^x]",
+					"regexp": "[^x]"
+				}
+			}
+		},
+		"share": {
+			"href": "/index.html",
+			"filters": {
+				"type": "url",
+				"url": {
+					"required": true,
+					"pattern": "https?://.*",
+					"regexp": "^https?://"
+				},
+				"sparrowsurf": {
+					"pattern": "[^x]",
+					"regexp": "[^x]"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,6 @@
+[aria-hidden="true"] {
+	display:  none
+}
+* {
+	visibility: visible !important;
+}
