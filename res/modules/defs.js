@@ -2,7 +2,9 @@
 MODULES = [
 	{
 		apply: 'html.duckduckgo.com',
-		postget: true
+		postget: true,
+		addNoJS: ['sites/duckduckgo.js'],
+		addJS: ['sites/duckduckgo.js']
 	},
 	{
 		apply: 'www.ecosia.org',

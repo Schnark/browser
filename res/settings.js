@@ -388,6 +388,7 @@ Settings.prototype.show = function (noFocus) {
 
 	prefs = this.browser.getPrefs();
 	this.el('prefs-proxy-url').value = prefs.proxyUrl;
+	this.el('prefs-proxy-url').dispatchEvent(new Event('blur'));
 	this.el('prefs-cors').checked = prefs.cors;
 	this.el('prefs-cert').checked = prefs.cert;
 	this.el('prefs-img-media').value = prefs.imgMedia;
@@ -398,6 +399,7 @@ Settings.prototype.show = function (noFocus) {
 		this.el('prefs-site-site').textContent = this.browser.siteFromUrl(url);
 		prefs = this.browser.getPrefs(url);
 		this.el('prefs-site-proxy-url').value = prefs.proxyUrl === undefined ? 'about:default' : prefs.proxyUrl;
+		this.el('prefs-site-proxy-url').dispatchEvent(new Event('blur'));
 		this.el('prefs-site-proxy').checked = prefs.proxy;
 		this.el('prefs-site-html').checked = prefs.html !== false;
 		this.el('prefs-site-js').checked = prefs.js;
