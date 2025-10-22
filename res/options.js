@@ -50,6 +50,9 @@ Options.prototype.getFile = function (path) {
 
 Options.prototype.getFiles = function (paths) {
 	return Promise.all(paths.map(function (path) {
+		if (path.slice(0, 5) === 'data:') {
+			return path;
+		}
 		return this.getFile(path);
 	}.bind(this)));
 };
@@ -100,6 +103,10 @@ Options.prototype.getOptions = function (url, noCache) {
 	} else {
 		addCSS = [prefs.dark ? 'default-dark.css' : 'default.css'];
 	}
+	if (prefs.additionalCSS) {
+		addCSS = addCSS || [];
+		addCSS.push('data:text/css;base64,' + btoa(prefs.additionalCSS));
+	}
 	return {
 		proxy: prefs.proxyUrl,
 		html: prefs.html ? (defaults.html || (embedHTML ? 'embed' : mainMode)) : 'none',
@@ -114,6 +121,7 @@ Options.prototype.getOptions = function (url, noCache) {
 		addCSS: addCSS,
 		addJS: addJS,
 		dark: prefs.dark,
+		useIcon: prefs.useIcon,
 		noCache: noCache
 	};
 };

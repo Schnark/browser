@@ -1,5 +1,5 @@
 /*global Tab: true*/
-/*global getDoc*/
+/*global getDoc, getFavicon, logger*/
 /*global URL*/
 Tab =
 (function () {
@@ -8,13 +8,16 @@ Tab =
 function Tab (browser, container0, container1) {
 	this.browser = browser;
 	this.titleBar = document.createElement('div');
+	this.icon = document.createElement('img');
+	this.icon.alt = '';
 	this.iframe = document.createElement('iframe');
+	container0.appendChild(this.icon);
 	container0.appendChild(this.titleBar);
 	container1.appendChild(this.iframe);
 	this.hide();
 	this.url = '';
 	this.title = 'New tab';
-	this.icon = '';
+	this.searchEngines = [];
 	this.cache = [];
 	this.objectUrls = [];
 	this.history = {
@@ -24,12 +27,14 @@ function Tab (browser, container0, container1) {
 }
 
 Tab.prototype.show = function () {
+	this.icon.style.display = '';
 	this.titleBar.style.display = '';
 	this.iframe.style.display = '';
 	this.iframe.focus();
 };
 
 Tab.prototype.hide = function () {
+	this.icon.style.display = 'none';
 	this.titleBar.style.display = 'none';
 	this.iframe.style.display = 'none';
 };
@@ -47,9 +52,38 @@ Tab.prototype.setTitle = function (title) {
 	this.title = title;
 };
 
+Tab.prototype.setIcon = function (icon) {
+	this.icon.src = icon;
+};
+
 Tab.prototype.setContent = function (content) {
 	this.iframe.src = content;
 	this.iframe.focus();
+};
+
+Tab.prototype.recordEntry = function (entry, noHistory) {
+	this.browser.record(entry);
+	if (!noHistory) {
+		this.history.entries.push(entry);
+		this.history.pos = this.history.entries.length - 1;
+	}
+};
+
+Tab.prototype.finalizeLoadUrl = function (icon, entry, options, noHistory) {
+	if (options.useIcon && icon) {
+		getFavicon(icon, options).then(function (icon) {
+			if (icon) {
+				this.setIcon(icon);
+				entry.icon = icon;
+			} else {
+				this.setIcon('');
+			}
+			this.recordEntry(entry, noHistory);
+		}.bind(this));
+	} else {
+		this.setIcon('');
+		this.recordEntry(entry, noHistory);
+	}
 };
 
 Tab.prototype.loadUrl = function (url, noHistory, noCache) {
@@ -57,25 +91,20 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 		noHistory = true;
 	}
 	this.url = url;
+	logger.log('NAV', url);
 	this.revokeObjectUrls();
 	this.browser.options.get(url, noCache).then(function (options) {
 		getDoc(url, options).then(function (data) {
-			var entry;
 			this.setTitle(data.title);
+			this.searchEngines = data.searchEngines;
 			this.setContent(data.content /*+ data.hash*/);
 			this.url = data.url + data.hash;
-			this.icon = data.icon;
 			this.cache = data.cache;
 			this.objectUrls = data.blobs;
-			entry = {
+			this.finalizeLoadUrl(data.icon, {
 				title: this.title,
 				url: this.url
-			};
-			this.browser.record(entry);
-			if (!noHistory) {
-				this.history.entries.push(entry);
-				this.history.pos = this.history.entries.length - 1;
-			}
+			}, options, noHistory);
 		}.bind(this));
 	}.bind(this));
 };
@@ -126,6 +155,7 @@ Tab.prototype.getHistory = function () {
 Tab.prototype.destroy = function () {
 	this.revokeObjectUrls();
 	this.setContent('about:blank');
+	this.icon.parentElement.removeChild(this.icon);
 	this.titleBar.parentElement.removeChild(this.titleBar);
 	this.iframe.parentElement.removeChild(this.iframe);
 };

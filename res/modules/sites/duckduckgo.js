@@ -4,7 +4,7 @@ window.onload = function () {
 		result = /^(?:https?:)?\/\/duckduckgo.com\/l\/\?uddg=([^&]+)/.exec(href);
 		if (result) {
 			try {
-				a.href = docodeURIComponent(result[1]);
+				a.href = decodeURIComponent(result[1]);
 			} catch (e) {
 			}
 		}

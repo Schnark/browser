@@ -4,6 +4,11 @@ Browser =
 (function () {
 "use strict";
 
+//jscs:disable maximumLineLength
+var SPARROWSURFICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAA5ElEQVQ4jWN49+7df2piBrobqHroz3+G3f//M+z+/1/10B/yDYQZggsTbeD6B58JGgbD6x98JmwgsYbhcikDsYYx7/73/+7du//v3r2L11CiDYQZdvX2vf9N518TNhA5NpEx796/cMNgmH8vqlrk2GfA57p5l59hGKZ64CfesMRpILpBuMIPp4EwL+My6O7du/9P37qP1TCsXiYUKXtuPILE9pYn/wVmtf3nWTif/FiW7HT+r1TO8F+xgvU/y8bbcHHhKXn4DXz37t1/pXIGFCxfLUh+wqZJ1qN64UCz4otcTHUDAcpGMYiFNMTHAAAAAElFTkSuQmCC',
+DUCKDUCKGOICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAADF0lEQVQ4jdXU32vVdRzHcf+BrkQQCcGGKMTUbXQm2Ahy+SuDEWZnW3CgVYMTLSbbWVHOaUhtywki/ZDoIghm9oPmmszNwzacnrPT3Fx1nPt+z4/v+Z4f39872+mcne/OsWcXIhLHzIsu6gPv2wdv3u/P673Gsiz+zVrz/wTNhExy6BuELjfC4Wqiz29jvqEG4WgTysQlzFQKyzQfATRNtNkAcm8remcTGZ+XgqlT1BTspEQueJP0mfeRe4+g3biOZRgPB7WbAaS2erLDF8hLYTLXL6OebEHcvp5w7Wb0c73kY1Hyfi+ypwFlavzvQVNRSPS1s3JtmOXRQcI1G1n87lNWgdz0JDHnLkK7yxB3bWB5dID8xCDx3laMiPBgULk6gnW6A1uWEKvXk+zuIM/9l4vcQn7zBcQDWxCfeZxscI6l7hZSF7/GNPRSUDj6GtngLMYXPUTqHKiSxMxtHcP6nTt/QCBRYLbNTXT/kwjPbkbpe49cYBy5rwNDUUrBYP3T2MkY4b1biLn2oKezjAckgqIFwI8zCr6+LvT2p5Dd5UgvOygYGtLbdZipZCkYOVhOMW2xULGWqKuWpbjMUtYmtyRyJ/I5zH5CbuBV0l9WoXVXIjjWUtBUEu69mKlEKbhwqJrCooHk3EnokANl+MLd4S0PUhx5DPN4GVpXOcaZSiL1FYSe24odjyB5nBgP6nChq5mMz4t69hjC7ieIn3r3Lli0sGfOYn60nUx3Jeo7VYT2l6F99iH27V+Re45gpFKlYGLoPEZnEyvCPKJjHVLzi9j3VhxKYDXW0n+sAr9rBxHHBlbCAtlzJ1DHhv6Smvv/MC4j97SSHf2ezMhF4vuq8PnP47rhonGsjn39O9jq3cYPhzdhDw5g/zxG/OM2dDn6kKTMTSF5nOSuXqKoKPwiTtI45eQVXz1ffevmgyst3JJnWPUOIHsaUP0TJZkuzfLcFPKpdhZPe0j/Nk1KFckUMqxm0pj+K2jH3yB28i206Wv/nOV7ZahJ1MnLhDpfZ76hBulgOcJLOxE6m0n+1I8uRx7x2vwXD+yfmW1cnUhf3xoAAAAASUVORK5CYII=';
+//jscs:enable maximumLineLength
+
 function Browser (container) {
 	this.container = container;
 	this.titleContainer = container.querySelector('.titlebar');
@@ -35,10 +40,16 @@ Browser.prototype.loadPrefs = function () {
 				imgMedia: '111',
 				font: false,
 				dark: false,
+				additionalCSS: '',
+				useIcon: false,
 				welcome: 0, //version of welcome page shown
-				v: 1 //version of prefs
+				v: 2 //version of prefs
 		}
 	});
+	if (this.prefs[''].v === 1) {
+		this.prefs[''].v = 2;
+		this.prefs[''].additionalCSS = '';
+	}
 	if (this.prefs[''].dark) {
 		this.container.className = 'dark-mode';
 	}
@@ -68,11 +79,11 @@ Browser.prototype.getPageDefaults = function (url) {
 
 Browser.prototype.loadBookmarksHistory = function () {
 	this.bookmarks = this.storage.load('bookmarks', [
-		{url: 'about:help', title: 'SparrowSurf Help'}
+		{url: 'about:help', title: 'SparrowSurf Help', icon: SPARROWSURFICON}
 	]);
 	this.visitedPages = this.storage.load('history', []);
 	this.searchEngines = this.storage.load('search', [
-		{url: 'https://html.duckduckgo.com/html/?q=%s', title: 'DuckDuckGo'}
+		{url: 'https://html.duckduckgo.com/html/?q=%s', title: 'DuckDuckGo', icon: DUCKDUCKGOICON}
 		//{url: 'https://www.ecosia.org/search?q=%s', title: 'Ecosia'} doesn't work (yet)
 		//{url: 'https://www.google.com/search?q=%s', title: 'Google'} requires cookies
 		//TODO more
@@ -100,12 +111,14 @@ Browser.prototype.record = function (entry) {
 		this.visitedPages.unshift({
 			url: entry.url,
 			title: entry.title,
+			icon: entry.icon,
 			d: Date.now(),
 			n: 1
 		});
 	} else {
 		data = this.visitedPages.splice(i, 1)[0];
 		data.title = entry.title;
+		data.icon = entry.icon || data.icon;
 		data.d = Date.now();
 		data.n++;
 		this.visitedPages.unshift(data);
@@ -141,10 +154,21 @@ Browser.prototype.isBookmark = function (url) {
 	return false;
 };
 
-Browser.prototype.addBookmark = function (url, title) {
+Browser.prototype.addBookmark = function (url, title, icon) {
 	this.removeBookmark(url, true);
-	this.bookmarks.unshift({url: url, title: title});
+	this.bookmarks.unshift({url: url, title: title, icon: icon});
 	this.storeBookmarks();
+};
+
+Browser.prototype.changeBookmarkTitle = function (url, title) {
+	var i;
+	for (i = this.bookmarks.length - 1; i >= 0; i--) {
+		if (this.bookmarks[i].url === url) {
+			this.bookmarks[i].title = title;
+			this.storeBookmarks();
+			return;
+		}
+	}
 };
 
 Browser.prototype.removeBookmark = function (url, noStore) {
@@ -168,7 +192,8 @@ Browser.prototype.getSuggestions = function (search, type) {
 		return this.searchEngines.map(function (engine) {
 			return {
 				url: engine.url.replace('%s', search),
-				title: engine.title
+				title: engine.title,
+				icon: engine.icon
 			};
 		});
 	}

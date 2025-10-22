@@ -8,9 +8,11 @@
 <script src="res/storage.js" defer></script>
 <script src="res/options.js" defer></script>
 <script src="res/lru.js" defer></script>
+<script src="res/logger.js" defer></script>
 <script src="res/get-blob.js" defer></script>
 <script src="res/modify.js" defer></script>
 <script src="res/get-doc.js" defer></script>
+<script src="res/get-favicon.js" defer></script>
 <script src="res/tab.js" defer></script>
 <script src="res/settings.js" defer></script>
 <script src="res/modules/defs.js" defer></script>
@@ -27,6 +29,10 @@
 <div class="history-buttons">
 <p><button class="history-back">←</button> <button class="history-forward">→</button> <button class="history-reload">↺</button> <button class="history-show">⇆</button> <button class="bookmark-add">☆</button> <button class="bookmark-remove">★</button> <button class="url-share"><svg width="24" height="24"><path fill="none" stroke="currentcolor" stroke-width="2" d="M 19,5 L 5,12 L 19,19" /><g fill="currentcolor" stroke="none"><circle cx="19" cy="5" r="4" /><circle cx="5" cy="12" r="4" /><circle cx="19" cy="19" r="4" /></g></svg></button> <button class="url-browse">↗</button></p>
 <ol class="history-list url-list"></ol>
+</div>
+<div class="bookmark-edit">
+<p><label>Bookmark title:<br><input class="bookmark-title"></label></p>
+<div class="search-engines-install"></div>
 </div>
 
 <form class="url-form"><p>
@@ -68,6 +74,7 @@
 <option value="101">Keep without changes</option>
 </select></label></p>
 <p><label><input type="checkbox" class="prefs-dark"> Prefer dark scheme</label></p>
+<p><label><input type="checkbox" class="prefs-icon"> Show favicons</label></p>
 <p><button>Apply</button></p></form>
 
 <div class="prefs-site-container">
@@ -109,6 +116,7 @@
 <option value="0">Prefer light scheme</option>
 <option value="1">Prefer dark scheme</option>
 </select></label></p>
+<p><label>Additional CSS:<textarea class="prefs-site-add-css"></textarea></label></p>
 <p><button>Apply</button></p></form>
 </div>
 

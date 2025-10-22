@@ -1,5 +1,5 @@
 /*global getBlob: true*/
-/*global LRU*/
+/*global LRU, logger*/
 /*global Promise, Blob*/
 getBlob =
 (function () {
@@ -17,6 +17,13 @@ function getAbout (url) {
 			data: '<!DOCTYPE html><html></html>',
 			type: 'text/html'
 		});
+	case 'about:log':
+		return Promise.resolve({
+			data: logger.get(),
+			type: 'text/plain'
+		});
+	case 'about:icon':
+		return getUrl('res/icons/icon128.png', 'image/png');
 	case 'about:help':
 		return getUrl('res/modules/about/help.html', 'text/html');
 	default:
@@ -30,15 +37,18 @@ function getUrl (url, type) {
 	}
 	return new Promise(function (resolve) {
 		var xhr = new XMLHttpRequest();
+		logger.log('GET', url);
 		xhr.open('GET', url);
 		xhr.responseType = 'arraybuffer';
 		xhr.onload = function () {
+			logger.log('SUCCESS', url);
 			resolve({
 				data: xhr.response,
 				type: type || xhr.getResponseHeader('Content-Type')
 			});
 		};
 		xhr.onerror = function () {
+			logger.log('ERROR', url);
 			resolve();
 		};
 		try {
@@ -54,6 +64,7 @@ function getUrlWithCache (url, nocache) {
 	if (!nocache) {
 		result = lru.get(url);
 		if (result) {
+			logger.log('LRU', url);
 			return result;
 		}
 	}

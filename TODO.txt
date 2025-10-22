@@ -2,10 +2,8 @@ For future versions
 
 * improve interface, esp. icons, form elements
 * loading indicator; allow aborting loading a page
-* allow editing bookmark title
 * allow editing search engines
 * allow removing history entries
-* handle favicons in some way
 * rightclick to open link in new tab, download image etc.; zoom
 * easy access to view source
 * allow saving pages offline

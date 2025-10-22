@@ -6,3 +6,10 @@
 .navigation {
 	position: static;
 }
+
+.external::after {
+	background-color: transparent;
+	content: "↗";
+	height: auto;
+	width: auto;
+}

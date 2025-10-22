@@ -128,6 +128,7 @@ Settings.prototype.init = function () {
 		var list = this.el('history-list');
 		if (list.style.display === 'none') {
 			list.style.display = '';
+			this.el('bookmark-edit').hidden = true;
 		} else {
 			list.style.display = 'none';
 		}
@@ -141,15 +142,27 @@ Settings.prototype.init = function () {
 		this.hide();
 	}.bind(this));
 	this.el('bookmark-add').addEventListener('click', function () {
-		//TODO allow changing the title
-		this.browser.addBookmark(this.browser.currentTab.url, this.browser.currentTab.title);
+		this.browser.addBookmark(this.browser.currentTab.url, this.browser.currentTab.title, this.browser.currentTab.icon.src);
 		this.el('bookmark-add').style.display = 'none';
 		this.el('bookmark-remove').style.display = '';
+		this.el('bookmark-edit').hidden = false;
+		this.el('history-list').style.display = 'none';
+		this.el('bookmark-title').value = this.browser.currentTab.title;
+		if (this.browser.currentTab.searchEngines.length) {
+			this.el('search-engines-install').innerHTML =
+				'<p>Installing of search engines will be possible in a later version.</p>';
+		} else {
+			this.el('search-engines-install').innerHTML = '';
+		}
+	}.bind(this));
+	this.el('bookmark-title').addEventListener('change', function () {
+		this.browser.changeBookmarkTitle(this.browser.currentTab.url, this.el('bookmark-title').value);
 	}.bind(this));
 	this.el('bookmark-remove').addEventListener('click', function () {
 		this.browser.removeBookmark(this.browser.currentTab.url);
 		this.el('bookmark-add').style.display = '';
 		this.el('bookmark-remove').style.display = 'none';
+		this.el('bookmark-edit').hidden = true;
 	}.bind(this));
 	if (supportsShare()) {
 		this.el('url-share').addEventListener('click', function () {
@@ -223,6 +236,7 @@ Settings.prototype.init = function () {
 		prefs.cert = this.el('prefs-cert').checked;
 		prefs.imgMedia = this.el('prefs-img-media').value;
 		prefs.dark = this.el('prefs-dark').checked;
+		prefs.useIcon = this.el('prefs-icon').checked;
 		this.browser.setPrefs(prefs);
 		this.browser.reload();
 		this.hide();
@@ -263,6 +277,10 @@ Settings.prototype.init = function () {
 		value = this.el('prefs-site-dark').value;
 		if (value) {
 			prefs.dark = value === '1';
+		}
+		value = this.el('prefs-site-add-css').value.trim();
+		if (value) {
+			prefs.additionalCSS = value;
 		}
 		this.browser.setPrefs(prefs, url);
 		this.browser.reload();
@@ -314,6 +332,7 @@ Settings.prototype.initSuggestions = function () {
 };
 
 Settings.prototype.showSuggestions = function (type) {
+	var prefs = this.browser.getPrefs();
 	this.suggestions.type = this.suggestions.type || type || 'top';
 	this.el('suggestions-top').classList.remove('selected');
 	this.el('suggestions-bookmarks').classList.remove('selected');
@@ -325,9 +344,11 @@ Settings.prototype.showSuggestions = function (type) {
 		this.suggestions.type
 	).map(function (suggestion) {
 		var liStart = '<li data-url="' + suggestion.url.replace(/"/g, '&quot;') + '">',
+			icon = prefs.useIcon && suggestion.icon ?
+				'<img alt="" src="' + suggestion.icon.replace(/"/g, '&quot;') + '"> ' : '',
 			title = '<span class="title">' + suggestion.title.replace(/</g, '&lt;') + '</span>',
 			url = '<span class="url">' + suggestion.url.replace(/</g, '&lt;') + '</span>';
-		return liStart + title + '<br>' + url + '</li>';
+		return liStart + icon + title + '<br>' + url + '</li>';
 	}).join('\n');
 	this.el('suggestion-list').style.display = '';
 };
@@ -351,6 +372,7 @@ Settings.prototype.show = function (noFocus) {
 	this.titleContainer.classList.add('settings-shown');
 	this.hidden = false;
 	this.container.scrollTop = 0;
+	prefs = this.browser.getPrefs();
 
 	if (url) {
 		this.el('history-buttons').style.display = '';
@@ -360,17 +382,20 @@ Settings.prototype.show = function (noFocus) {
 		this.el('history-show').disabled = history.entries.length <= 1;
 		this.el('history-list').innerHTML = history.entries.map(function (entry, i) {
 			var liStart = '<li ' + (i === history.pos ? 'class="current" ' : '') + 'data-index="' + i + '">',
+				icon = prefs.useIcon && entry.icon ? '<img alt="" src="' + entry.icon.replace(/"/g, '&quot;') + '"> ' : '',
 				title = '<span class="title">' + entry.title.replace(/</g, '&lt;') + '</span>',
 				url = '<span class="url">' + entry.url.replace(/</g, '&lt;') + '</span>';
-			return Math.abs(i - history.pos) <= 7 ? liStart + title + '<br>' + url + '</li>' : '';
+			return Math.abs(i - history.pos) <= 7 ? liStart + icon + title + '<br>' + url + '</li>' : '';
 		}).join('\n');
 		this.el('history-list').style.display = 'none';
 		isBookmark = this.browser.isBookmark(url);
 		this.el('bookmark-add').style.display = isBookmark ? 'none' : '';
 		this.el('bookmark-remove').style.display = isBookmark ? '' : 'none';
+		this.el('url-browse').disabled = !(/^https?:\/\//.test(url));
 	} else {
 		this.el('history-buttons').style.display = 'none';
 	}
+	this.el('bookmark-edit').hidden = true;
 	this.hideSuggestions();
 
 	this.el('url-input').value = url;
@@ -380,19 +405,20 @@ Settings.prototype.show = function (noFocus) {
 
 	this.el('tab-list').innerHTML = this.browser.tabs.map(function (tab, i) {
 		var liStart = '<li ' + (tab === this.browser.currentTab ? 'class="current" ' : '') + 'data-index="' + i + '">',
+			icon = tab.icon.src ? '<img alt="" src="' + tab.icon.src.replace(/"/g, '&quot;') + '"> ' : '',
 			title = '<span class="title">' + tab.title.replace(/</g, '&lt;') + '</span>',
 			url = '<span class="url">' + tab.url.replace(/</g, '&lt;') + '</span>',
 			button = '<button title="Close tab" data-action="close" data-index="' + i + '">X</button>';
-		return liStart + title + '<br>' + url + ' ' + button + '</li>';
+		return liStart + icon + title + '<br>' + url + ' ' + button + '</li>';
 	}.bind(this)).join('\n');
 
-	prefs = this.browser.getPrefs();
 	this.el('prefs-proxy-url').value = prefs.proxyUrl;
 	this.el('prefs-proxy-url').dispatchEvent(new Event('blur'));
 	this.el('prefs-cors').checked = prefs.cors;
 	this.el('prefs-cert').checked = prefs.cert;
 	this.el('prefs-img-media').value = prefs.imgMedia;
 	this.el('prefs-dark').checked = prefs.dark;
+	this.el('prefs-icon').checked = prefs.useIcon;
 
 	if (url) {
 		this.el('prefs-site-container').style.display = '';
@@ -407,6 +433,7 @@ Settings.prototype.show = function (noFocus) {
 		this.el('prefs-site-img-media').value = prefs.imgMedia || '';
 		this.el('prefs-site-font').checked = prefs.font;
 		this.el('prefs-site-dark').value = prefs.dark === undefined ? '' : (prefs.dark ? '1' : '0');
+		this.el('prefs-site-add-css').value = prefs.additionalCSS || '\n';
 	} else {
 		this.el('prefs-site-container').style.display = 'none';
 	}

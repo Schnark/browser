@@ -1,3 +1,29 @@
-.collapsed {
+/*TODO refine*/
+#header {
 	display: none;
+}
+
+/*doesn't display correctly, doesn't work correctly, I don't use it*/
+ul.interaction-bar {
+	display: none;
+}
+
+/*original with :where(.hgroup)*/
+.teaser .hgroup .topline {
+  font-size: var(--sds-number-teaser-typo-topline);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--_color-text);
+  text-wrap: wrap;
+  text-wrap: pretty;
+}
+.teaser .hgroup .headline {
+  font-size: var(--sds-number-teaser-typo-headline-small);
+  font-weight: 700;
+  line-height: 1.25;
+  padding-top: 4px;
+}
+.teaser .hgroup span {
+  color: var(--_color-text);
+  display: block;
 }

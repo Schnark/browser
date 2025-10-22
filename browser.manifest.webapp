@@ -1,8 +1,8 @@
 {
-	"version": "0.2",
+	"version": "0.3",
 	"name": "SparrowSurf",
 	"description": "simple browser",
-	"size": 48078,
+	"size": 51890,
 	"package_path": "http://localhost:8080/browser.zip",
 	"icons": {
 		"128": "/res/icons/icon128.png",

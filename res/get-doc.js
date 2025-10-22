@@ -38,6 +38,9 @@ function getPrefix (text) {
 
 function getMainFavicon (url) {
 	var i;
+	if (url.slice(0, 6) === 'about:') {
+		return 'about:icon';
+	}
 	if (url.slice(0, 7) !== 'http://' && url.slice(0, 8) !== 'https://') {
 		return '';
 	}
@@ -101,15 +104,24 @@ function getHTML (data, options) {
 		var prefix = getPrefix(html),
 			doc = (new DOMParser()).parseFromString(html, 'text/html'),
 			urls,
-			icon;
+			icon,
+			searchEngines;
 		//TODO optionally set data.url to canonical url, like <meta property="og:url" content=""> etc.
 		urls = modify.html(doc, data.url, prefix, options);
+
 		icon = doc.querySelectorAll('link[rel~="icon"][href]');
 		if (icon.length) {
 			icon = icon[0].href; //TODO pick best icon
 		} else {
 			icon = '';
 		}
+		searchEngines = [].map.call(
+			doc.querySelectorAll('link[rel="search"][type="application/opensearchdescription+xml"][href]'),
+			function (el) {
+				return {url: el.href, title: el.title || ''};
+			}
+		);
+
 		html = '\uFEFF' + (new XMLSerializer()).serializeToString(doc);
 		return inlineUrls({
 			text: html,
@@ -127,6 +139,7 @@ function getHTML (data, options) {
 			file.cache = file.cache.concat(result.cache);
 			file.title = doc.title || file.title;
 			file.icon = icon || file.icon;
+			file.searchEngines = searchEngines;
 			return file;
 		});
 	});
@@ -201,6 +214,7 @@ function getFile (data) {
 		url: data.url,
 		hash: data.hash,
 		icon: getMainFavicon(data.url),
+		searchEngines: [],
 		content: blobUrl,
 		blobs: [blobUrl],
 		cache: [data.cache]

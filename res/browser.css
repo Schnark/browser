@@ -12,8 +12,13 @@ body {
 label,
 input,
 select,
+textarea,
 button {
 	font: inherit;
+}
+
+textarea {
+	display: block;
 }
 
 button:not(:disabled) {
@@ -21,6 +26,8 @@ button:not(:disabled) {
 }
 
 input[type="url"],
+input:not([type]),
+textarea,
 select {
 	width: 100%;
 }
@@ -38,6 +45,13 @@ select {
 
 .titlebar.settings-shown {
 	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"><path d="M2,4 L18,20 M2,20 L18,4" stroke="black" stroke-width="4" stroke-linecap="round" /></svg>');
+}
+
+.titlebar img {
+	margin-top: 6px;
+	margin-left: -24px;
+	float: left;
+	border-radius: 4px;
 }
 
 .titlebar div {
@@ -112,6 +126,11 @@ select {
 	border-width: medium;
 }
 
+.url-list li img {
+	vertical-align: bottom;
+	border-radius: 4px;
+}
+
 .url-list li .title {
 	font-weight: bold;
 }
@@ -144,7 +163,13 @@ select {
 	color: #ff0;
 }
 
-.url-input {
+.bookmark-edit {
+	border: solid thin;
+	padding: 0 0.5em;
+	margin: -1px -0.5em 0;
+}
+
+input.url-input {
 	font: inherit;
 	width: calc(100% - 2em);
 	height: 2em;
