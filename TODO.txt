@@ -1,11 +1,8 @@
-For future versions
-
 * improve interface, esp. icons, form elements
-* loading indicator; allow aborting loading a page
-* allow editing search engines
-* allow removing history entries
-* rightclick to open link in new tab, download image etc.; zoom
-* easy access to view source
+* allow aborting loading a page
+* improve context menu (video, audio, download)
+* zoom
+* page search
 * allow saving pages offline
 * allow pages to add extra links (e.g. xkcd.com -> explainxkcd.com)
 * build some pages from an API (e.g. Wikipedia)

@@ -28,6 +28,7 @@ html {
 <h2>Restrictions</h2>
 <p>Because of its design, SparrowSurf has some restrictions:</p>
 <ul>
+<li>You have to rely on the operator of the proxy for privacy and data integrity.</li>
 <li>Pages cannot properly use cookies, so some sites will not work and you will not be able to log into any accounts.</li>
 <li>Pages can only load via GET, so forms that use POST will not work. (In a few cases SparrowSurf will use GET for some forms instead.)</li>
 <li>Redirects are only poorly supported.</li>
@@ -35,13 +36,18 @@ html {
 <li>An attacker could read your bookmarks, history etc. with a specially crafted page. This is unlikely, but not impossible.</li>
 </ul>
 <p>Any other problems are probably bugs and you should report them to me.</p>
-<p>You can also tell me about important sites that could benefit from some additional CSS or JS to fix problems. For example if you regularly visit a page where a menu hides some part of the content because it should be hidden by JS code that does not work, I can add additional CSS to hide that menu or perhaps even some JS code to properly toggle it.</p>
-<p>Alternatively you can simply disable CSS for such a site, which will make it readable in most cases. If things are really bad you could also try to add <code>view-source:</code> in front of the URL to see the page as HTML source code.</p>
+<p>When a page does not properly display (e.g. a menu partially covering the page) because it relies on modern CSS or JS you have several options:</p>
+<ul>
+<li>You can add additional CSS for that site.</li>
+<li>You can disable CSS for that site.</li>
+<li>You can view the HTML source code by adding <code>view-source:</code> in front of the URL (also available via the context menu).</li>
+</ul>
+<p>For important sites you can also tell me about the problems. Using internal mechanisms I can inject not only additional CSS, but also JS and have some more options to improve a site.</p>
 
 <h2>Usage</h2>
 <p>Using SparrowSurf should be self-explanatory in most cases. Tap the top bar to show or hide the settings. From there you have access to:</p>
-<p><b>Navigation bar:</b> Go back or forward, reload the current page, show the history for the current tab (to go back or forward by more than one step), (un)bookmark the current page, share it or open it in another browser.</p>
-<p><b>URL bar:</b> Enter a new URL. You can search through the top pages, your bookmarks, the history, or start a web search.</p>
+<p><b>Navigation bar:</b> Go back or forward, reload the current page, show the history for the current tab (to go back or forward by more than one step), (un)bookmark the current page (also allows you to install search engines), store a page for offline usage (not implemented yet), share it or open it in another browser.</p>
+<p><b>URL bar:</b> Enter a new URL. You can search through the top pages, your bookmarks, the history, or start a web search. You can also use the edit function to remove history entries and search engines.</p>
 <p><b>Tabs:</b> Open a new tab, switch to another tab already open or close them.</p>
 <p><b>General preferences:</b> Change the default preferences for all sites.</p>
 <p><b>Site preferences:</b> Change the preferences for the current site, overriding the general defaults.</p>
@@ -50,9 +56,7 @@ html {
 <p>Some features I plan for the future:</p>
 <ul>
 <li>Add additional CSS/JS for more pages to fix small problems.</li>
-<li>Show favicons.</li>
-<li>Allow editing bookmark titles, search engines, removing history entries.</li>
-<li>Add a context menu to open links in a new tab, download images, etc.; allow zooming pages.</li>
+<li>Allow zooming pages.</li>
 <li>Allow saving pages offline.</p>
 </ul>
 <p>I also have some more ideas. If you also have some additional wishes feel free to tell me about them.</p>

@@ -139,10 +139,31 @@ select {
 	font-size: 90%;
 }
 
+.url-list li button {
+	padding: 0.3em 0.75em;
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border: 0;
+	border-radius: 0;
+	background: #008;
+	color: #fff;
+	font-weight: bold;
+}
+
+.url-list li button[data-action="remove"] {
+	background: #800;
+}
+
+.url-list li:first-child button[data-action="default"] {
+	display: none;
+}
+
 .history-buttons p {
 	background-color: #000;
 	margin: 0 -0.75em;
-	padding: 0 0.75em;
+	padding: 0;
 }
 
 .history-buttons button {
@@ -152,7 +173,7 @@ select {
 	border: none;
 	border-radius: 0;
 	margin: 0;
-	padding: 0.3em;
+	padding: 0.25em;
 }
 
 .history-buttons button:disabled {
@@ -163,7 +184,8 @@ select {
 	color: #ff0;
 }
 
-.bookmark-edit {
+.bookmark-edit,
+.offline-edit {
 	border: solid thin;
 	padding: 0 0.5em;
 	margin: -1px -0.5em 0;
@@ -223,14 +245,21 @@ input.url-input {
 .suggestion-buttons button {
 	background: #fff;
 	color: #000;
+	font-size: 81.25%;
+	line-height: 1.2;
 	border: solid thin;
 	border-bottom-width: 1px;
-	padding: 0.3em 0.5em 0.1em;
+	padding: 0.3em 0.5em;
 	border-radius: 0.25em 0.25em 0 0;
+	vertical-align: bottom;
 }
 
 .suggestion-buttons button.selected {
 	border-bottom-color: #fff;
+}
+
+.suggestions-edit {
+	float: right;
 }
 
 .suggestion-list {
@@ -258,17 +287,48 @@ input.url-input {
 	padding-right: 3em;
 }
 
-.tab-list li button {
-	padding: 0.3em 0.75em;
-	position: absolute;
+.context-menu {
+	position: fixed;
+	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
-	border: 0;
-	border-radius: 0;
-	background: #800;
+	background: #222;
+}
+
+.context-menu button {
+	background: #555;
 	color: #fff;
-	font-weight: bold;
+	border: 0;
+	margin: 0.75em 1em;
+	padding: 0.75em;
+	width: calc(100% - 2em);
+	text-align: left;
+	font-style: italic;
+}
+
+button.context-menu-cancel {
+	position: absolute;
+	bottom: 0.75em;
+	text-align: center;
+	border-radius: 1.5em / 50%;
+	background: #eee;
+	color: #000;
+}
+
+.context-menu-buttons {
+	margin: 0;
+	margin-bottom: 5.25em;
+	padding: 0;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+.context-menu-buttons li {
+	display: block;
+	margin: 0;
+	padding: 0;
 }
 
 /*dark mode*/

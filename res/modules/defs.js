@@ -21,7 +21,8 @@ MODULES = [
 	{
 		apply: 'www.swr.de',
 		cors: true,
-		addCSS: ['sites/swr.css']
+		addCSS: ['sites/swr.css'],
+		addNoJS: ['sites/swr.js']
 	},
 	{
 		apply: 'www.tagesschau.de',

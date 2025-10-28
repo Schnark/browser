@@ -9,12 +9,15 @@ QUnit.test('Complete functions', function (assert) {
 	lru.set('b', 'B');
 	lru.set('c', 'C');
 	lru.set('d', 'D');
-	assert.expect();
+	assert.expect(6);
 	assert.strictEqual(lru.get('a'), undefined, 'a no longer in cache');
 	assert.strictEqual(lru.get('b'), 'B', 'b retrieved from cache');
 	lru.set('e', 'E');
 	assert.strictEqual(lru.get('b'), 'B', 'b still in cache');
 	assert.strictEqual(lru.get('c'), undefined, 'c no longer in cache');
+	assert.strictEqual(lru.get('e'), 'E', 'e in cache');
+	lru.remove('e');
+	assert.strictEqual(lru.get('e'), undefined, 'e removed from cache');
 });
 
 })();

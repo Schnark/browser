@@ -1,8 +1,8 @@
 {
-	"version": "0.3",
+	"version": "0.4",
 	"name": "SparrowSurf",
 	"description": "simple browser",
-	"size": 51890,
+	"size": 62330,
 	"package_path": "https://schnark.github.io/browser/browser.zip",
 	"icons": {
 		"128": "/res/icons/icon128.png",

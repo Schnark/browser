@@ -74,7 +74,7 @@ function getDocs (urls, options, i) {
 	if (urls.length === i) {
 		return Promise.resolve([]);
 	}
-	return getDoc(urls[i], options).then(function (doc) {
+	return getDocOrError(urls[i], options).then(function (doc) {
 		return getDocs(urls, options, i + 1).then(function (docs) {
 			docs.unshift(doc);
 			return docs;

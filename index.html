@@ -13,6 +13,8 @@
 <script src="res/modify.js" defer></script>
 <script src="res/get-doc.js" defer></script>
 <script src="res/get-favicon.js" defer></script>
+<script src="res/get-osd.js" defer></script>
+<script src="res/context-menu.js" defer></script>
 <script src="res/tab.js" defer></script>
 <script src="res/settings.js" defer></script>
 <script src="res/modules/defs.js" defer></script>
@@ -27,18 +29,31 @@
 <div class="tabs"></div>
 <div class="settings">
 <div class="history-buttons">
-<p><button class="history-back">←</button> <button class="history-forward">→</button> <button class="history-reload">↺</button> <button class="history-show">⇆</button> <button class="bookmark-add">☆</button> <button class="bookmark-remove">★</button> <button class="url-share"><svg width="24" height="24"><path fill="none" stroke="currentcolor" stroke-width="2" d="M 19,5 L 5,12 L 19,19" /><g fill="currentcolor" stroke="none"><circle cx="19" cy="5" r="4" /><circle cx="5" cy="12" r="4" /><circle cx="19" cy="19" r="4" /></g></svg></button> <button class="url-browse">↗</button></p>
-<ol class="history-list url-list"></ol>
+<p>
+<button class="history-back">←</button>
+<button class="history-forward">→</button>
+<button class="history-reload">↺</button>
+<button class="history-show">⇆</button>
+<button class="bookmark-add">☆</button>
+<button class="bookmark-remove">★</button>
+<button class="offline-status"><span style="text-decoration: underline;">↓</span></button>
+<button class="url-share"><svg width="24" height="24"><path fill="none" stroke="currentcolor" stroke-width="2" d="M 19,5 L 5,12 L 19,19" /><g fill="currentcolor" stroke="none"><circle cx="19" cy="5" r="4" /><circle cx="5" cy="12" r="4" /><circle cx="19" cy="19" r="4" /></g></svg></button>
+<button class="url-browse">↗</button>
+</p>
+<ol class="history-list url-list" hidden></ol>
 </div>
-<div class="bookmark-edit">
+<div class="bookmark-edit" hidden>
 <p><label>Bookmark title:<br><input class="bookmark-title"></label></p>
 <div class="search-engines-install"></div>
+</div>
+<div class="offline-edit" hidden>
+<p>In a future version it will be possible to save pages for offline usage.</p>
 </div>
 
 <form class="url-form"><p>
 <input class="url-input"><button>→</button>
 </p></form>
-<p class="suggestion-buttons"><button class="suggestions-top">Top</button> <button class="suggestions-bookmarks">Bookmarks</button> <button class="suggestions-history">History</button> <button class="suggestions-search">Search</button></p>
+<p class="suggestion-buttons"><button class="suggestions-top">Top</button> <button class="suggestions-bookmarks">Bookmarks</button> <button class="suggestions-history">History</button> <button class="suggestions-search">Search</button> <button class="suggestions-edit">✎</button></p>
 <ol class="suggestion-list url-list"></ol>
 
 <h2>Tabs</h2>
@@ -121,5 +136,9 @@
 </div>
 
 </div>
+</div>
+<div class="context-menu" hidden>
+<ul class="context-menu-buttons"></ul>
+<button class="context-menu-cancel">Cancel</button>
 </div>
 </body></html>

@@ -9,7 +9,11 @@ function Tab (browser, container0, container1) {
 	this.browser = browser;
 	this.titleBar = document.createElement('div');
 	this.icon = document.createElement('img');
+	this.icon.width = 20;
+	this.icon.height = 20;
 	this.icon.alt = '';
+	this.icon.hidden = true;
+	this.iconUrl = '';
 	this.iframe = document.createElement('iframe');
 	container0.appendChild(this.icon);
 	container0.appendChild(this.titleBar);
@@ -53,7 +57,14 @@ Tab.prototype.setTitle = function (title) {
 };
 
 Tab.prototype.setIcon = function (icon) {
-	this.icon.src = icon;
+	if (icon === '...') {
+		this.icon.src = 'res/icons/throbber.gif';
+		this.iconUrl = '';
+	} else {
+		this.icon.src = icon;
+		this.iconUrl = icon;
+	}
+	this.icon.hidden = !icon;
 };
 
 Tab.prototype.setContent = function (content) {
@@ -64,6 +75,9 @@ Tab.prototype.setContent = function (content) {
 Tab.prototype.recordEntry = function (entry, noHistory) {
 	this.browser.record(entry);
 	if (!noHistory) {
+		if (this.history.pos !== this.history.entries.length - 1) {
+			this.history.entries.push(this.history.entries.splice(this.history.pos, 1)[0]);
+		}
 		this.history.entries.push(entry);
 		this.history.pos = this.history.entries.length - 1;
 	}
@@ -91,6 +105,7 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 		noHistory = true;
 	}
 	this.url = url;
+	this.setIcon('...');
 	logger.log('NAV', url);
 	this.revokeObjectUrls();
 	this.browser.options.get(url, noCache).then(function (options) {

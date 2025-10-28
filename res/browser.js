@@ -1,5 +1,5 @@
 /*global Browser: true*/
-/*global Storage, Options, Tab, Settings, Modules, MODULES*/
+/*global Storage, Options, ContextMenu, Tab, Settings, Modules, MODULES*/
 Browser =
 (function () {
 "use strict";
@@ -20,10 +20,10 @@ function Browser (container) {
 	this.loadPrefs();
 	this.loadBookmarksHistory();
 	this.options = new Options(this);
+	this.contextMenu = new ContextMenu(container.querySelector('.context-menu'));
 	this.modules = new Modules(MODULES);
 	window.addEventListener('message', function (e) {
-		var data = e.data;
-		this.navigate(data.url, data.target);
+		this.onMessage(e.data);
 	}.bind(this));
 }
 
@@ -49,6 +49,7 @@ Browser.prototype.loadPrefs = function () {
 	if (this.prefs[''].v === 1) {
 		this.prefs[''].v = 2;
 		this.prefs[''].additionalCSS = '';
+		this.storePrefs();
 	}
 	if (this.prefs[''].dark) {
 		this.container.className = 'dark-mode';
@@ -87,6 +88,8 @@ Browser.prototype.loadBookmarksHistory = function () {
 		//{url: 'https://www.ecosia.org/search?q=%s', title: 'Ecosia'} doesn't work (yet)
 		//{url: 'https://www.google.com/search?q=%s', title: 'Google'} requires cookies
 		//TODO more
+		//to add a new search engine for all users, increment the prefs version and add it for all
+		//users of a lower version
 	]);
 };
 
@@ -98,7 +101,9 @@ Browser.prototype.storeHistory = function () {
 	this.storage.save('history', this.visitedPages);
 };
 
-//TODO allow editing search engines
+Browser.prototype.storeSearchEngines = function () {
+	this.storage.save('search', this.searchEngines);
+};
 
 Browser.prototype.record = function (entry) {
 	var i, data, now;
@@ -144,6 +149,17 @@ Browser.prototype.record = function (entry) {
 	this.storeHistory();
 };
 
+Browser.prototype.removeHistoryEntry = function (url) {
+	var i;
+	for (i = 0; i < this.visitedPages.length; i++) {
+		if (this.visitedPages[i].url === url) {
+			this.visitedPages.splice(i, 1);
+			this.storeHistory();
+			return;
+		}
+	}
+};
+
 Browser.prototype.isBookmark = function (url) {
 	var i;
 	for (i = 0; i < this.bookmarks.length; i++) {
@@ -182,6 +198,37 @@ Browser.prototype.removeBookmark = function (url, noStore) {
 			return;
 		}
 	}
+};
+
+Browser.prototype.canEditSearchEngines = function () {
+	return this.searchEngines.length >= 2;
+};
+
+Browser.prototype.addSearchEngine = function (searchEngine) {
+	var i;
+	for (i = 0; i < this.searchEngines.length; i++) {
+		if (this.searchEngines[i].url === searchEngine.url) {
+			//only add icon for search engine already in the list
+			if (!this.searchEngines[i].icon && searchEngine.icon) {
+				this.searchEngines[i].icon = searchEngine.icon;
+				this.storeSearchEngines();
+			}
+			return;
+		}
+	}
+	this.searchEngines.push(searchEngine);
+	this.storeSearchEngines();
+};
+
+Browser.prototype.removeSearchEngine = function (index) {
+	this.searchEngines.splice(index, 1);
+	this.storeSearchEngines();
+};
+
+Browser.prototype.defaultSearchEngine = function (index) {
+	var search = this.searchEngines.splice(index, 1)[0];
+	this.searchEngines.unshift(search);
+	this.storeSearchEngines();
 };
 
 Browser.prototype.getSuggestions = function (search, type) {
@@ -227,6 +274,14 @@ Browser.prototype.getSuggestions = function (search, type) {
 	}
 
 	return list;
+};
+
+Browser.prototype.showContextMenu = function (data, callback) {
+	this.contextMenu.show(data.map(function (entry) {
+		return entry.text;
+	}), function (i) {
+		callback(data[i]);
+	});
 };
 
 Browser.prototype.createTab = function () {
@@ -307,6 +362,36 @@ Browser.prototype.historyGo = function (index) {
 Browser.prototype.showBookmarks = function () {
 	this.settings.show(true);
 	this.settings.showSuggestions('bookmarks');
+};
+
+Browser.prototype.onMessage = function (data) {
+	var contextMenuEntries;
+	if (data.type === 'navigate') {
+		this.navigate(data.url, data.target);
+		return;
+	}
+	//data.type === 'context-menu'
+	contextMenuEntries = data.context.map(function (entry) {
+		switch (entry.type) {
+		case 'a':
+			return {
+				text: 'Open link in a new tab',
+				url: entry.url
+			};
+		case 'img':
+			return {
+				text: 'Open image in a new tab',
+				url: entry.url
+			};
+		}
+	});
+	contextMenuEntries.push({
+		text: 'Show HTML source',
+		url: 'view-source:' + this.currentTab.url
+	});
+	this.showContextMenu(contextMenuEntries, function (data) {
+		this.navigate(data.url, '_blank');
+	}.bind(this));
 };
 
 return Browser;

@@ -18,10 +18,24 @@ function getAbout (url) {
 			type: 'text/html'
 		});
 	case 'about:log':
+		Promise.resolve().then(function () {
+			lru.remove(url);
+		});
 		return Promise.resolve({
 			data: logger.get(),
 			type: 'text/plain'
 		});
+	case 'about:slow':
+		return new Promise(
+			function (resolve) {
+				window.setTimeout(function () {
+					resolve({
+						data: 'This page takes 5 seconds to load.',
+						type: 'text/plain'
+					});
+				}, 5000);
+			}
+		);
 	case 'about:icon':
 		return getUrl('res/icons/icon128.png', 'image/png');
 	case 'about:help':
@@ -48,6 +62,7 @@ function getUrl (url, type) {
 			});
 		};
 		xhr.onerror = function () {
+			lru.remove(url);
 			logger.log('ERROR', url);
 			resolve();
 		};

@@ -41,5 +41,9 @@ LRU.prototype.set = function (key, value) {
 	this.trim();
 };
 
+LRU.prototype.remove = function (key) {
+	this.getRemove(key);
+};
+
 return LRU;
 })();

@@ -2,7 +2,11 @@
 "use strict";
 
 function navigate (url, target) {
-	window.top.postMessage({url: url, target: target}, '*');
+	window.top.postMessage({type: 'navigate', url: url, target: target}, '*');
+}
+
+function contextmenu (context) {
+	window.top.postMessage({type: 'context-menu', context: context}, '*');
 }
 
 function isValidLink (url) {
@@ -76,6 +80,34 @@ document.addEventListener('click', function (e) {
 			e.preventDefault();
 			navigate(href, getTarget(link));
 		}
+	}
+}, true);
+
+document.addEventListener('contextmenu', function (e) {
+	var context = [], link, url;
+	if (!e.defaultPrevented) {
+		e.preventDefault();
+		if (e.target.tagName === 'IMG') {
+			url = e.target.getAttribute('src');
+			if (url && url !== 'about:invalid') {
+				context.push({
+					type: 'img',
+					url: url
+				});
+			}
+		}
+		url = '';
+		link = getLink(e.target);
+		if (link) {
+			url = link.getAttribute('href');
+		}
+		if (url && url.charAt(0) !== '#') {
+			context.push({
+				type: 'a',
+				url: url
+			});
+		}
+		contextmenu(context);
 	}
 }, true);
 

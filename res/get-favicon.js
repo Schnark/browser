@@ -36,6 +36,9 @@ function createFavicon (url, options) {
 			return;
 		}
 		return drawFavicon(result.blob);
+	}).then(null, function () {
+		//just in case something goes wrong
+		return;
 	});
 }
 
