@@ -69,21 +69,21 @@ function blobToText (blob) {
 	});
 }
 
-function getDocs (urls, options, i) {
+function getDocs (urls, options, track, i) {
 	i = i || 0;
 	if (urls.length === i) {
 		return Promise.resolve([]);
 	}
-	return getDocOrError(urls[i], options).then(function (doc) {
-		return getDocs(urls, options, i + 1).then(function (docs) {
+	return getDocOrError(urls[i], options, track).then(function (doc) {
+		return getDocs(urls, options, track, i + 1).then(function (docs) {
 			docs.unshift(doc);
 			return docs;
 		});
 	});
 }
 
-function inlineUrls (data, prefix, options) {
-	return getDocs(data.urls, options).then(function (docs) {
+function inlineUrls (data, prefix, options, track) {
+	return getDocs(data.urls, options, track).then(function (docs) {
 		var result = {
 			blobs: [],
 			cache: []
@@ -99,7 +99,7 @@ function inlineUrls (data, prefix, options) {
 	});
 }
 
-function getHTML (data, options) {
+function getHTML (data, options, track) {
 	return blobToText(data.blob).then(function (html) {
 		var prefix = getPrefix(html),
 			doc = (new DOMParser()).parseFromString(html, 'text/html'),
@@ -126,7 +126,7 @@ function getHTML (data, options) {
 		return inlineUrls({
 			text: html,
 			urls: urls
-		}, prefix, options).then(function (result) {
+		}, prefix, options, track).then(function (result) {
 			var file = getFile(
 				{
 					url: data.url,
@@ -145,11 +145,11 @@ function getHTML (data, options) {
 	});
 }
 
-function getCSS (data, options) {
+function getCSS (data, options, track) {
 	return blobToText(data.blob).then(function (css) {
 		var prefix = getPrefix(css), cssAndUrls;
 		cssAndUrls = modify.css(css, data.url, prefix, options);
-		return inlineUrls(cssAndUrls, prefix, options).then(function (result) {
+		return inlineUrls(cssAndUrls, prefix, options, track).then(function (result) {
 			var file = getFile(
 				{
 					url: data.url,
@@ -221,13 +221,27 @@ function getFile (data) {
 	};
 }
 
-function getDoc (url, options) {
+function createErrorData (url, text) {
+	return {
+		url: url,
+		hash: '',
+		blob: new Blob([text], {type: 'text/plain'})
+	};
+}
+
+function getDoc (url, options, track) {
+	track = track || [];
+	if (track.indexOf(url) > -1) {
+		return Promise.resolve(getError(createErrorData(url, 'Recursive dependency on ' + url, options)));
+	}
+	track = [].slice.call(track);
+	track.push(url);
 	return getBlob(url, options).then(function (data) {
 		switch (getType(data)) {
 		case 'html':
-			return getHTML(data, options);
+			return getHTML(data, options, track);
 		case 'css':
-			return getCSS(data, options);
+			return getCSS(data, options, track);
 		case 'text':
 			return getText(data, options);
 		case 'error':
@@ -238,16 +252,11 @@ function getDoc (url, options) {
 	});
 }
 
-function getDocOrError (url, options) {
-	return getDoc(url, options).then(null,
+function getDocOrError (url, options, track) {
+	return getDoc(url, options, track).then(null,
 		function (e) {
 			//this should not happen, but - alas - sometimes it does
-			var data = {
-				url: url,
-				hash: '',
-				blob: new Blob([String(e) + '\n\n' + String(e.stack)], {type: 'text/plain'})
-			};
-			return getError(data, options);
+			return getError(createErrorData(url, String(e) + '\n\n' + String(e.stack)), options);
 		}
 	);
 }

@@ -15,6 +15,9 @@ function modifyCSS (css, baseUrl, prefix, options, urls) {
 
 	function replaceUrl (url, type) {
 		var hashIndex, hash = '', mode, i;
+		if (!url || url.charAt(0) === '#') {
+			return url;
+		}
 		url = String(new URL(url, baseUrl));
 		if (isSpecialUrl(url)) {
 			return url;
@@ -124,6 +127,11 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 		doc.querySelector('head').appendChild(base);
 		base.href = baseUrl;
 	}
+
+	//no preload
+	[].forEach.call(doc.querySelectorAll('link[rel="preload"]'), function (el) {
+		el.parentElement.removeChild(el);
+	});
 
 	//drop scripts and styles according to options
 	if (options.js === 'none' || options.js === 'inline') {
@@ -237,7 +245,6 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 		}
 		el.setAttribute('xlink:href', url === base.href ? hash : getNewUrl(url, 'img') + hash);
 	});
-	//TODO drop some/all <link rel="preload"> etc.
 
 	//remove some hrefs
 	[].forEach.call(doc.querySelectorAll('[ping]'), function (el) {
@@ -250,7 +257,10 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 		el.parentElement.removeChild(el);
 	});
 
-	//TODO srcset
+	//TODO handle srcset properly
+	[].forEach.call(doc.querySelectorAll('[srcset]'), function (el) {
+		el.removeAttribute('srcset');
+	});
 
 	//optionally: for <audio> and <video>: add controls, drop autoplay and loop, set preload="none"
 	if (options.manualMedia) {

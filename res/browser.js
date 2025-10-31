@@ -1,5 +1,6 @@
 /*global Browser: true*/
-/*global Storage, Options, ContextMenu, Tab, Settings, Modules, MODULES*/
+/*global Storage, Options, ContextMenu, getBlob, Tab, Settings, Modules, MODULES*/
+/*global URL*/
 Browser =
 (function () {
 "use strict";
@@ -335,6 +336,35 @@ Browser.prototype.navigate = function (url, target) {
 	this.currentTab.loadUrl(url);
 };
 
+Browser.prototype.download = function (url, name) {
+	name = name || url.replace(/\/+$/, '').replace(/^.*\//, '');
+	this.options.get(url).then(function (options) {
+		getBlob(url, options).then(function (result) {
+			var a;
+			if (result.error) {
+				return;
+			}
+			url = URL.createObjectURL(result.blob);
+			a = document.createElement('a');
+			a.href = url;
+			a.target = '_blank';
+			a.download = name;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			window.setTimeout(function () {
+				URL.revokeObjectURL(url);
+			}, 10000);
+		});
+	});
+};
+
+Browser.prototype.abort = function () {
+	if (this.currentTab) {
+		this.currentTab.abort();
+	}
+};
+
 Browser.prototype.reload = function (force) {
 	if (this.currentTab) {
 		this.currentTab.reload(force);
@@ -370,19 +400,45 @@ Browser.prototype.onMessage = function (data) {
 		this.navigate(data.url, data.target);
 		return;
 	}
+	if (data.type === 'download') {
+		this.download(data.url, data.name);
+		return;
+	}
 	//data.type === 'context-menu'
-	contextMenuEntries = data.context.map(function (entry) {
+	contextMenuEntries = [];
+	data.context.forEach(function (entry) {
+		var media;
 		switch (entry.type) {
 		case 'a':
-			return {
+			contextMenuEntries.push({
 				text: 'Open link in a new tab',
 				url: entry.url
-			};
+			});
+			if (/.pdf(?:#|$)/i.test(entry.url)) {
+				contextMenuEntries.push({
+					text: 'Download link target',
+					url: entry.url,
+					download: true
+				});
+			}
+			break;
 		case 'img':
-			return {
-				text: 'Open image in a new tab',
+		case 'audio':
+		case 'video':
+			media = {
+				img: 'image',
+				audio: 'audio file',
+				video: 'video'
+			}[entry.type];
+			contextMenuEntries.push({
+				text: 'Open ' + media + ' in a new tab',
 				url: entry.url
-			};
+			});
+			contextMenuEntries.push({
+				text: 'Download ' + media,
+				url: entry.url,
+				download: true
+			});
 		}
 	});
 	contextMenuEntries.push({
@@ -390,7 +446,11 @@ Browser.prototype.onMessage = function (data) {
 		url: 'view-source:' + this.currentTab.url
 	});
 	this.showContextMenu(contextMenuEntries, function (data) {
-		this.navigate(data.url, '_blank');
+		if (data.download) {
+			this.download(data.url);
+		} else {
+			this.navigate(data.url, '_blank');
+		}
 	}.bind(this));
 };
 

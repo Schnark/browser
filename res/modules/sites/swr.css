@@ -36,3 +36,8 @@ ul.interaction-bar {
 	color: var(--_color-text);
 	display: block;
 }
+
+/*original with character from PUA*/
+quote .quote-blockquote p::before {
+  content: "”";
+}

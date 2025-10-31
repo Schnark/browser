@@ -5,6 +5,12 @@ function toggle (e) {
 	var el = document.querySelector(this.dataset.target);
 	if (el) {
 		el.hidden = !el.hidden;
+		if (!el.hidden) {
+			//TODO should we keep something? add something instead?
+			//add the classes again on hide?
+			el.className = '';
+		}
+		this.className = el.hidden ? 'collapsed' : '';
 	}
 }
 

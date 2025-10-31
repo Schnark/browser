@@ -1,6 +1,4 @@
 * improve interface, esp. icons, form elements
-* allow aborting loading a page
-* improve context menu (video, audio, download)
 * zoom
 * page search
 * allow saving pages offline

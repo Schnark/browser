@@ -138,6 +138,10 @@ Settings.prototype.init = function () {
 		this.browser.historyForward();
 		this.hide();
 	}.bind(this));
+	this.el('history-abort').addEventListener('click', function () {
+		this.browser.abort();
+		this.hide();
+	}.bind(this));
 	this.el('history-reload').addEventListener('click', function () {
 		this.browser.reload(true);
 		this.hide();
@@ -504,7 +508,7 @@ Settings.prototype.editSuggestions = function (edit) {
 
 Settings.prototype.show = function (noFocus) {
 	var url = this.browser.currentTab ? this.browser.currentTab.url : '',
-		history, isBookmark, prefs;
+		history, isLoading, isBookmark, prefs;
 	this.container.classList.add('visible');
 	this.titleContainer.classList.add('settings-shown');
 	this.hidden = false;
@@ -516,6 +520,9 @@ Settings.prototype.show = function (noFocus) {
 		history = this.browser.currentTab.getHistory();
 		this.el('history-back').disabled = history.pos <= 0;
 		this.el('history-forward').disabled = history.pos + 1 >= history.entries.length;
+		isLoading = this.browser.currentTab.isLoading;
+		this.el('history-abort').style.display = isLoading ? '' : 'none';
+		this.el('history-reload').style.display = isLoading ? 'none' : '';
 		this.el('history-show').disabled = history.entries.length <= 1;
 		this.el('history-list').innerHTML = createUrlList(history.entries, history.pos, prefs.useIcon, false, 7);
 		isBookmark = this.browser.isBookmark(url);

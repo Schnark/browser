@@ -5,6 +5,10 @@ function navigate (url, target) {
 	window.top.postMessage({type: 'navigate', url: url, target: target}, '*');
 }
 
+function download (url, name) {
+	window.top.postMessage({type: 'download', url: url, name: name}, '*');
+}
+
 function contextmenu (context) {
 	window.top.postMessage({type: 'context-menu', context: context}, '*');
 }
@@ -76,22 +80,26 @@ document.addEventListener('click', function (e) {
 			}
 		} else if (isValidLink(href)) {
 			//TODO handle ismap
-			//TODO handle download
 			e.preventDefault();
-			navigate(href, getTarget(link));
+			if (link.hasAttribute('download')) {
+				download(href, link.getAttribute('download'));
+			} else {
+				navigate(href, getTarget(link));
+			}
 		}
 	}
 }, true);
 
 document.addEventListener('contextmenu', function (e) {
-	var context = [], link, url;
+	var context = [], tag, link, url;
 	if (!e.defaultPrevented) {
 		e.preventDefault();
-		if (e.target.tagName === 'IMG') {
+		tag = e.target.tagName.toLowerCase();
+		if (['img', 'audio', 'video'].indexOf(tag) > -1) {
 			url = e.target.getAttribute('src');
 			if (url && url !== 'about:invalid') {
 				context.push({
-					type: 'img',
+					type: tag,
 					url: url
 				});
 			}

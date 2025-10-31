@@ -141,6 +141,11 @@ QUnit.test('Fonts', function (assert) {
 			options: {font: 'none'},
 			css: cssFontFace('local("Font Name"), url("fonts/FontName-Regular.woff")'),
 			result: cssFontFace('local("Font Name"), url("about:invalid")')
+		},
+		{
+			name: 'Broken fonts (occurring in real stylesheets)',
+			css: cssFontFace('url() format("eot"), url(#foo) format("svg")'),
+			result: cssFontFace('url() format("eot"), url(#foo) format("svg")')
 		}
 	], assert);
 });

@@ -1,5 +1,5 @@
 /*global Tab: true*/
-/*global getDoc, getFavicon, logger*/
+/*global getBlob, getDoc, getFavicon, logger*/
 /*global URL*/
 Tab =
 (function () {
@@ -24,6 +24,8 @@ function Tab (browser, container0, container1) {
 	this.searchEngines = [];
 	this.cache = [];
 	this.objectUrls = [];
+	this.isAborting = false;
+	this.isLoading = false;
 	this.history = {
 		pos: -1,
 		entries: []
@@ -73,6 +75,15 @@ Tab.prototype.setContent = function (content) {
 };
 
 Tab.prototype.recordEntry = function (entry, noHistory) {
+	this.isLoading = false;
+	if (this.isAborting) {
+		try {
+			this.iframe.contentWindow.stop();
+		} catch (e) {
+		}
+		this.isAborting = false;
+		getBlob.abort(false);
+	}
 	this.browser.record(entry);
 	if (!noHistory) {
 		if (this.history.pos !== this.history.entries.length - 1) {
@@ -85,7 +96,7 @@ Tab.prototype.recordEntry = function (entry, noHistory) {
 
 Tab.prototype.finalizeLoadUrl = function (icon, entry, options, noHistory) {
 	if (options.useIcon && icon) {
-		getFavicon(icon, options).then(function (icon) {
+		return getFavicon(icon, options).then(function (icon) {
 			if (icon) {
 				this.setIcon(icon);
 				entry.icon = icon;
@@ -101,6 +112,14 @@ Tab.prototype.finalizeLoadUrl = function (icon, entry, options, noHistory) {
 };
 
 Tab.prototype.loadUrl = function (url, noHistory, noCache) {
+	if (this.isLoading) {
+		this.abort();
+		this.loadingPromise.then(function () {
+			this.loadUrl(url, noHistory, noCache);
+		}.bind(this));
+		return;
+	}
+	this.isLoading = true;
 	if (this.url === url) {
 		noHistory = true;
 	}
@@ -108,20 +127,29 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 	this.setIcon('...');
 	logger.log('NAV', url);
 	this.revokeObjectUrls();
-	this.browser.options.get(url, noCache).then(function (options) {
-		getDoc(url, options).then(function (data) {
+	this.loadingPromise = this.browser.options.get(url, noCache).then(function (options) {
+		return getDoc(url, options).then(function (data) {
 			this.setTitle(data.title);
-			this.searchEngines = data.searchEngines;
 			this.setContent(data.content /*+ data.hash*/);
 			this.url = data.url + data.hash;
+			this.searchEngines = data.searchEngines;
 			this.cache = data.cache;
 			this.objectUrls = data.blobs;
-			this.finalizeLoadUrl(data.icon, {
+			return this.finalizeLoadUrl(data.icon, {
 				title: this.title,
 				url: this.url
 			}, options, noHistory);
 		}.bind(this));
 	}.bind(this));
+};
+
+Tab.prototype.abort = function () {
+	this.isAborting = true;
+	getBlob.abort(true);
+	try {
+		this.iframe.contentWindow.stop();
+	} catch (e) {
+	}
 };
 
 Tab.prototype.reload = function (force) {

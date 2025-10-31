@@ -5,7 +5,9 @@ getBlob =
 (function () {
 "use strict";
 
-var lru = new LRU(10);
+var lru = new LRU(10),
+	currentXHR = {},
+	isAborting = false;
 
 //TODO allow durable offline caching
 //use the cache key for details
@@ -28,7 +30,15 @@ function getAbout (url) {
 	case 'about:slow':
 		return new Promise(
 			function (resolve) {
+				currentXHR[url] = {
+					abort: function () {
+						delete currentXHR[url];
+						lru.remove(url);
+						resolve();
+					}
+				};
 				window.setTimeout(function () {
+					delete currentXHR[url];
 					resolve({
 						data: 'This page takes 5 seconds to load.',
 						type: 'text/plain'
@@ -45,7 +55,7 @@ function getAbout (url) {
 	}
 }
 
-function getUrl (url, type) {
+function getUrl (url, type, timeout) {
 	if (url.slice(0, 6) === 'about:') {
 		return getAbout(url);
 	}
@@ -54,27 +64,38 @@ function getUrl (url, type) {
 		logger.log('GET', url);
 		xhr.open('GET', url);
 		xhr.responseType = 'arraybuffer';
+
+		function onError () {
+			delete currentXHR[url];
+			lru.remove(url);
+			logger.log('ERROR', url);
+			resolve();
+		}
+
+		if (timeout) {
+			xhr.timeout = timeout;
+		}
 		xhr.onload = function () {
+			delete currentXHR[url];
 			logger.log('SUCCESS', url);
 			resolve({
 				data: xhr.response,
 				type: type || xhr.getResponseHeader('Content-Type')
 			});
 		};
-		xhr.onerror = function () {
-			lru.remove(url);
-			logger.log('ERROR', url);
-			resolve();
-		};
+		xhr.onerror = onError;
+		xhr.onabort = onError;
+		xhr.ontimeout = onError;
+		currentXHR[url] = xhr;
 		try {
 			xhr.send();
 		} catch (e) {
-			xhr.onerror();
+			onError();
 		}
 	});
 }
 
-function getUrlWithCache (url, nocache) {
+function getUrlWithCache (url, nocache, timeout) {
 	var result;
 	if (!nocache) {
 		result = lru.get(url);
@@ -83,7 +104,11 @@ function getUrlWithCache (url, nocache) {
 			return result;
 		}
 	}
-	result = getUrl(url);
+	if (isAborting) {
+		logger.log('SKIP', url);
+		return Promise.resolve();
+	}
+	result = getUrl(url, null, timeout);
 	lru.set(url, result);
 	return result;
 }
@@ -103,7 +128,7 @@ function getBlob (url, options) {
 	if (xhrUrl.slice(0, 7) === 'http://' || xhrUrl.slice(0, 8) === 'https://') {
 		xhrUrl = options.proxy + xhrUrl;
 	}
-	return getUrlWithCache(xhrUrl, options.noCache).then(function (result) {
+	return getUrlWithCache(xhrUrl, options.noCache, options.timeout).then(function (result) {
 		var type, blobOptions;
 		if (!result) {
 			return {
@@ -140,6 +165,19 @@ function getBlob (url, options) {
 		};
 	});
 }
+
+function setAbort (abort) {
+	//TODO allow selective aborting
+	isAborting = abort;
+	if (abort) {
+		logger.log('ABORT', '');
+		Object.keys(currentXHR).forEach(function (url) {
+			currentXHR[url].abort();
+		});
+	}
+}
+
+getBlob.abort = setAbort;
 
 return getBlob;
 })();

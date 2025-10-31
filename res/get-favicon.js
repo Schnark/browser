@@ -16,13 +16,21 @@ function drawFavicon (blob) {
 		canvas.width = 20;
 		canvas.height = 20;
 		img.onload = function () {
-			URL.revokeObjectURL(url);
-			ctx.fillStyle = '#eee';
-			ctx.fillRect(0, 0, 20, 20);
-			ctx.drawImage(img, 2, 2, 16, 16);
-			resolve(canvas.toDataURL('image/png'));
+			var url;
+			try {
+				URL.revokeObjectURL(url);
+				ctx.fillStyle = '#eee';
+				ctx.fillRect(0, 0, 20, 20);
+				ctx.drawImage(img, 2, 2, 16, 16);
+				url = canvas.toDataURL('image/png');
+				logger.log('FAVICON-SUCCESS', '');
+			} catch (e) {
+				logger.log('FAVICON-ERROR', String(e));
+			}
+			resolve(url);
 		};
 		img.onerror = function () {
+			logger.log('FAVICON-ERROR', '');
 			URL.revokeObjectURL(url);
 			resolve();
 		};
@@ -36,15 +44,13 @@ function createFavicon (url, options) {
 			return;
 		}
 		return drawFavicon(result.blob);
-	}).then(null, function () {
-		//just in case something goes wrong
-		return;
 	});
 }
 
 function getFavicon (url, options) {
 	var result;
 	logger.log('FAVICON', url);
+	options.timeout = 2000;
 	if (!options.noCache) {
 		result = lru.get(url);
 		if (result) {
