@@ -129,6 +129,13 @@ Settings.prototype.init = function () {
 	initSuggestor(this.el('prefs-proxy-url'), this.el('prefs-proxy-url-list'));
 	initSuggestor(this.el('prefs-site-proxy-url'), this.el('prefs-site-proxy-url-list'));
 
+	this.container.addEventListener('change', function (e) {
+		var button = e.target.dataset.enable;
+		if (button) {
+			this.el(button).disabled = false;
+		}
+	}.bind(this));
+
 	//history buttons
 	this.el('history-back').addEventListener('click', function () {
 		this.browser.historyBack();
@@ -201,7 +208,8 @@ Settings.prototype.init = function () {
 		this.el('bookmark-remove').style.display = 'none';
 		this.el('bookmark-edit').hidden = true;
 	}.bind(this));
-	this.el('offline-status').addEventListener('click', function () {
+	function toggleOfflineInfo () {
+		/*jshint validthis: true*/
 		var container = this.el('offline-edit');
 		if (container.hidden) {
 			container.hidden = false;
@@ -210,7 +218,10 @@ Settings.prototype.init = function () {
 		} else {
 			container.hidden = true;
 		}
-	}.bind(this));
+	}
+	this.el('offline-status-0').addEventListener('click', toggleOfflineInfo.bind(this));
+	this.el('offline-status-1').addEventListener('click', toggleOfflineInfo.bind(this));
+	this.el('offline-status-2').addEventListener('click', toggleOfflineInfo.bind(this));
 	//share buttons
 	if (supportsShare()) {
 		this.el('url-share').addEventListener('click', function () {
@@ -317,6 +328,7 @@ Settings.prototype.showPrefs = function (prefs) {
 	this.el('prefs-img-media').value = prefs.imgMedia;
 	this.el('prefs-dark').checked = prefs.dark;
 	this.el('prefs-icon').checked = prefs.useIcon;
+	this.el('prefs-apply').disabled = true;
 };
 
 Settings.prototype.savePrefs = function () {
@@ -341,6 +353,7 @@ Settings.prototype.showSitePrefs = function (prefs) {
 	this.el('prefs-site-font').checked = prefs.font;
 	this.el('prefs-site-dark').value = prefs.dark === undefined ? '' : (prefs.dark ? '1' : '0');
 	this.el('prefs-site-add-css').value = prefs.additionalCSS || '\n';
+	this.el('prefs-site-apply').disabled = true;
 };
 
 Settings.prototype.saveSitePrefs = function (url) {
@@ -528,6 +541,9 @@ Settings.prototype.show = function (noFocus) {
 		isBookmark = this.browser.isBookmark(url);
 		this.el('bookmark-add').style.display = isBookmark ? 'none' : '';
 		this.el('bookmark-remove').style.display = isBookmark ? '' : 'none';
+		this.el('offline-status-0').style.display = '';
+		this.el('offline-status-1').style.display = 'none';
+		this.el('offline-status-2').style.display = 'none';
 		this.el('url-browse').disabled = !(/^https?:\/\//.test(url));
 	} else {
 		this.el('history-buttons').style.display = 'none';

@@ -122,6 +122,7 @@ Options.prototype.getOptions = function (url, noCache) {
 		addJS: addJS,
 		dark: prefs.dark,
 		useIcon: prefs.useIcon,
+		context: defaults.context || {},
 		noCache: noCache
 	};
 };

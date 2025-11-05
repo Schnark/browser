@@ -1,8 +1,6 @@
-* improve interface, esp. icons, form elements
 * zoom
 * page search
 * allow saving pages offline
-* allow pages to add extra links (e.g. xkcd.com -> explainxkcd.com)
 * build some pages from an API (e.g. Wikipedia)
 * add more CSS for important sites
 * include DevDocs

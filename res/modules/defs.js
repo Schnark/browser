@@ -54,6 +54,10 @@ MODULES = [
 	},
 	{
 		apply: 'm.xkcd.com',
-		addNoJS: ['sites/xkcd.js']
+		addNoJS: ['sites/xkcd.js'],
+		context: {
+			'^https://m\\.xkcd\\.com/$': ['explainxkcd.com', 'https://www.explainxkcd.com/wiki/index.php/Main_Page'],
+			'^https://m\\.xkcd\\.com/(\\d+)/$': ['explainxkcd.com', 'https://www.explainxkcd.com/wiki/index.php/$1']
+		}
 	}
 ];

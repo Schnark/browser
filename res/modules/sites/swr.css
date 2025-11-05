@@ -37,7 +37,15 @@ ul.interaction-bar {
 	display: block;
 }
 
+/*original with body:has()*/
+@media (min-width:1024px) {
+#playerbar,.frontmod-schnellanmeldebox,body{--sds-number-article-typo-topline:1.25rem;--sds-number-article-typo-headline:2.5rem;--sds-number-article-typo-leadtext:1.25rem;--sds-number-article-typo-quote:1.5rem;--sds-number-article-typo-copy:1.25rem;--sds-number-article-typo-h2:2rem;--sds-number-article-typo-h3:1.5rem;--sds-number-article-typo-h4:1.25rem;--sds-number-article-typo-info-1:1.125rem;--sds-number-article-typo-info-2:1rem;--sds-number-article-spacing-between-elements:32px;--sds-number-article-typo-linkbox:1.125rem}
+}
+@media (max-width:1023px) {
+#playerbar,.frontmod-schnellanmeldebox,body{--sds-number-article-typo-topline:0.875rem;--sds-number-article-typo-headline:1.75rem;--sds-number-article-typo-leadtext:1.125rem;--sds-number-article-typo-quote:1.25rem;--sds-number-article-typo-copy:1.125rem;--sds-number-article-typo-h2:1.5rem;--sds-number-article-typo-h3:1.25rem;--sds-number-article-typo-h4:1.125rem;--sds-number-article-typo-info-1:1rem;--sds-number-article-typo-info-2:0.875rem;--sds-number-article-spacing-between-elements:24px;--sds-number-article-typo-linkbox:1rem}
+}
+
 /*original with character from PUA*/
-quote .quote-blockquote p::before {
+.quote .quote-blockquote p::before {
   content: "”";
 }

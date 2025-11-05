@@ -133,6 +133,7 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 			this.setContent(data.content /*+ data.hash*/);
 			this.url = data.url + data.hash;
 			this.searchEngines = data.searchEngines;
+			this.context = options.context;
 			this.cache = data.cache;
 			this.objectUrls = data.blobs;
 			return this.finalizeLoadUrl(data.icon, {

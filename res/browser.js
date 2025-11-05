@@ -395,7 +395,7 @@ Browser.prototype.showBookmarks = function () {
 };
 
 Browser.prototype.onMessage = function (data) {
-	var contextMenuEntries;
+	var currentUrl, contextMenuEntries, extraContext;
 	if (data.type === 'navigate') {
 		this.navigate(data.url, data.target);
 		return;
@@ -441,9 +441,22 @@ Browser.prototype.onMessage = function (data) {
 			});
 		}
 	});
+	currentUrl = this.currentTab.url;
+	extraContext = this.currentTab.context;
+	Object.keys(extraContext).forEach(function (re) {
+		var result = (new RegExp(re)).exec(currentUrl);
+		if (result) {
+			contextMenuEntries.push({
+				text: extraContext[re][0],
+				url: extraContext[re][1].replace(/\$(\d+)/g, function (all, index) {
+					return result[index];
+				})
+			});
+		}
+	});
 	contextMenuEntries.push({
 		text: 'Show HTML source',
-		url: 'view-source:' + this.currentTab.url
+		url: 'view-source:' + currentUrl
 	});
 	this.showContextMenu(contextMenuEntries, function (data) {
 		if (data.download) {

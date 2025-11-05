@@ -29,18 +29,31 @@
 <div class="tabs"></div>
 <div class="settings">
 <div class="history-buttons">
-<p>
-<button class="history-back">←</button>
-<button class="history-forward">→</button>
-<button class="history-abort">X</button>
-<button class="history-reload">↺</button>
-<button class="history-show">⇆</button>
-<button class="bookmark-add">☆</button>
-<button class="bookmark-remove">★</button>
-<button class="offline-status"><span style="text-decoration: underline;">↓</span></button>
-<button class="url-share"><svg width="24" height="24"><path fill="none" stroke="currentcolor" stroke-width="2" d="M 19,5 L 5,12 L 19,19" /><g fill="currentcolor" stroke="none"><circle cx="19" cy="5" r="4" /><circle cx="5" cy="12" r="4" /><circle cx="19" cy="19" r="4" /></g></svg></button>
-<button class="url-browse">↗</button>
-</p>
+<p><button class="history-back"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 10,20 H 30 M 15,15 L 10,20 L 15,25" />
+</svg></button><button class="history-forward"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 10,20 H 30 M 25,15 L 30,20 L 25,25" />
+</svg></button><button class="history-abort"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 10,10 L 30,30 M 10,30 L 30,10" />
+</svg></button><button class="history-reload"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 12.93,12.93 A 10,10 0 1 0 27.07,12.93 M 25,18 L 25,11 L 32,11" />
+</svg></button><button class="history-show"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 10,15 H 30 M 15,10 L 10,15 L 15,20 M 10,25 H 30 M 25,20 L 30,25 L 25,30" />
+</svg></button><button class="bookmark-add"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 20,10 L 17.06,15.95 L 10.49,16.91 L 15.24,21.55 L 14.12,28.09 L 20,25 L 25.88,28.09 L 24.76,21.55 L 29.51,16.91 L 22.94,15.95 z" />
+</svg></button><button class="bookmark-remove"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 20,10 L 17.06,15.95 L 10.49,16.91 L 15.24,21.55 L 14.12,28.09 L 20,25 L 25.88,28.09 L 24.76,21.55 L 29.51,16.91 L 22.94,15.95 z" fill="currentcolor" />
+</svg></button><button class="offline-status-0"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 20,10 L 20,25 M 15,20 L 20,25 L 25,20 M 10,30 L 30,30" />
+</svg></button><button class="offline-status-1"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 15,20 L 18,23.75 M 21,21.25 L 23,17.5 M 25,13.75 L 27,10 M 10,30 L 30,30" />
+</svg></button><button class="offline-status-2"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 15,20 L 19,25 L 27,10 M 10,30 L 30,30" />
+</svg></button><button class="url-share"><svg width="40" height="40" viewBox="0 0 40 40">
+<circle cx="14" cy="20" r="4" fill="currentcolor" stroke="none" /><circle cx="26" cy="14" r="4" fill="currentcolor" stroke="none" /><circle cx="26" cy="26" r="4" fill="currentcolor" stroke="none" /><path d="M 26,14 L 14,20 L 26,26" />
+</svg></button><button class="url-browse"><svg width="40" height="40" viewBox="0 0 40 40">
+<path d="M 16,24 L 30,10 M 23,10 L 30,10 L 30,17 M 30,22 L 30,30 L 10,30 L 10,10 L 18,10" />
+</svg></button></p>
 <ol class="history-list url-list" hidden></ol>
 </div>
 <div class="bookmark-edit" hidden>
@@ -80,18 +93,18 @@
 <option value="">Own proxy</option>
 </optgroup>
 </select></label><br>
-<input type="url" class="prefs-proxy-url"></p>
-<p><label><input type="checkbox" class="prefs-cors"> Avoid proxy for sites known to work without</label></p>
-<p><label><input type="checkbox" class="prefs-cert"> Use proxy for all content on sites known to use a certificate unknown in FFOS</label></p>
-<p><label>Images and media:<br><select class="prefs-img-media">
+<input type="url" class="prefs-proxy-url" data-enable="prefs-apply"></p>
+<p><label><input type="checkbox" class="prefs-cors" data-enable="prefs-apply"> Avoid proxy for sites known to work without</label></p>
+<p><label><input type="checkbox" class="prefs-cert" data-enable="prefs-apply"> Use proxy for all content on sites known to use a certificate unknown in FFOS</label></p>
+<p><label>Images and media:<br><select class="prefs-img-media" data-enable="prefs-apply">
 <option value="000">Remove</option>
 <option value="100">Keep images, remove media</option>
 <option value="111">Keep, but do not autoplay media</option>
 <option value="101">Keep without changes</option>
 </select></label></p>
-<p><label><input type="checkbox" class="prefs-dark"> Prefer dark scheme</label></p>
-<p><label><input type="checkbox" class="prefs-icon"> Show favicons</label></p>
-<p><button>Apply</button></p></form>
+<p><label><input type="checkbox" class="prefs-dark" data-enable="prefs-apply"> Prefer dark scheme</label></p>
+<p><label><input type="checkbox" class="prefs-icon" data-enable="prefs-apply"> Show favicons</label></p>
+<p><button class="prefs-apply">Apply</button></p></form>
 
 <div class="prefs-site-container">
 <h2 class="with-subtitle">Site preferences</h2>
@@ -114,26 +127,26 @@
 <option value="">Own proxy</option>
 </optgroup>
 </select></label><br>
-<input type="url" class="prefs-site-proxy-url"></p>
-<p><label><input type="checkbox" class="prefs-site-proxy"> Use proxy for all content</label></p>
-<p><label><input type="checkbox" class="prefs-site-html"> Enable frames</label></p>
-<p><label><input type="checkbox" class="prefs-site-js"> Enable JS</label></p>
-<p><label><input type="checkbox" class="prefs-site-css"> Enable CSS</label></p>
-<p><label>Images and media:<br><select class="prefs-site-img-media">
+<input type="url" class="prefs-site-proxy-url" data-enable="prefs-site-apply"></p>
+<p><label><input type="checkbox" class="prefs-site-proxy" data-enable="prefs-site-apply"> Use proxy for all content</label></p>
+<p><label><input type="checkbox" class="prefs-site-html" data-enable="prefs-site-apply"> Enable frames</label></p>
+<p><label><input type="checkbox" class="prefs-site-js" data-enable="prefs-site-apply"> Enable JS</label></p>
+<p><label><input type="checkbox" class="prefs-site-css" data-enable="prefs-site-apply"> Enable CSS</label></p>
+<p><label>Images and media:<br><select class="prefs-site-img-media" data-enable="prefs-site-apply">
 <option value="">Use general preference</option>
 <option value="000">Remove</option>
 <option value="100">Keep images, remove media</option>
 <option value="111">Keep, but do not autoplay media</option>
 <option value="101">Keep without changes</option>
 </select></label></p>
-<p><label><input type="checkbox" class="prefs-site-font"> Enable downloadable fonts</label></p>
-<p><label>Color scheme:<br><select class="prefs-site-dark">
+<p><label><input type="checkbox" class="prefs-site-font" data-enable="prefs-site-apply"> Enable downloadable fonts</label></p>
+<p><label>Color scheme:<br><select class="prefs-site-dark" data-enable="prefs-site-apply">
 <option value="">Use general preference</option>
 <option value="0">Prefer light scheme</option>
 <option value="1">Prefer dark scheme</option>
 </select></label></p>
-<p><label>Additional CSS:<textarea class="prefs-site-add-css"></textarea></label></p>
-<p><button>Apply</button></p></form>
+<p><label>Additional CSS:<textarea class="prefs-site-add-css" data-enable="prefs-site-apply"></textarea></label></p>
+<p><button class="prefs-site-apply">Apply</button></p></form>
 </div>
 
 </div>

@@ -16,18 +16,18 @@ function drawFavicon (blob) {
 		canvas.width = 20;
 		canvas.height = 20;
 		img.onload = function () {
-			var url;
+			var dataUrl;
 			try {
 				URL.revokeObjectURL(url);
 				ctx.fillStyle = '#eee';
 				ctx.fillRect(0, 0, 20, 20);
 				ctx.drawImage(img, 2, 2, 16, 16);
-				url = canvas.toDataURL('image/png');
+				dataUrl = canvas.toDataURL('image/png');
 				logger.log('FAVICON-SUCCESS', '');
 			} catch (e) {
 				logger.log('FAVICON-ERROR', String(e));
 			}
-			resolve(url);
+			resolve(dataUrl);
 		};
 		img.onerror = function () {
 			logger.log('FAVICON-ERROR', '');
