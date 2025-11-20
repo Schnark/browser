@@ -1,6 +1,6 @@
 /*global Tab: true*/
-/*global getBlob, getDoc, getFavicon, logger*/
-/*global URL*/
+/*global getDoc, getFavicon, logger*/
+/*global URL, AbortController*/
 Tab =
 (function () {
 "use strict";
@@ -24,7 +24,7 @@ function Tab (browser, container0, container1) {
 	this.searchEngines = [];
 	this.cache = [];
 	this.objectUrls = [];
-	this.isAborting = false;
+	this.abortController = new AbortController();
 	this.isLoading = false;
 	this.history = {
 		pos: -1,
@@ -74,15 +74,13 @@ Tab.prototype.setContent = function (content) {
 	this.iframe.focus();
 };
 
-Tab.prototype.recordEntry = function (entry, noHistory) {
+Tab.prototype.recordEntry = function (entry, noHistory, abortSignal) {
 	this.isLoading = false;
-	if (this.isAborting) {
+	if (abortSignal.aborted) {
 		try {
 			this.iframe.contentWindow.stop();
 		} catch (e) {
 		}
-		this.isAborting = false;
-		getBlob.abort(false);
 	}
 	this.browser.record(entry);
 	if (!noHistory) {
@@ -103,11 +101,11 @@ Tab.prototype.finalizeLoadUrl = function (icon, entry, options, noHistory) {
 			} else {
 				this.setIcon('');
 			}
-			this.recordEntry(entry, noHistory);
+			this.recordEntry(entry, noHistory, options.signal);
 		}.bind(this));
 	} else {
 		this.setIcon('');
-		this.recordEntry(entry, noHistory);
+		this.recordEntry(entry, noHistory, options.signal);
 	}
 };
 
@@ -120,6 +118,7 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 		return;
 	}
 	this.isLoading = true;
+	this.abortController = new AbortController();
 	if (this.url === url) {
 		noHistory = true;
 	}
@@ -127,7 +126,13 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 	this.setIcon('...');
 	logger.log('NAV', url);
 	this.revokeObjectUrls();
-	this.loadingPromise = this.browser.options.get(url, noCache).then(function (options) {
+	this.loadingPromise = this.browser.options.get(
+		url,
+		{
+			noCache: noCache,
+			signal: this.abortController.signal
+		}
+	).then(function (options) {
 		return getDoc(url, options).then(function (data) {
 			this.setTitle(data.title);
 			this.setContent(data.content /*+ data.hash*/);
@@ -145,8 +150,7 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 };
 
 Tab.prototype.abort = function () {
-	this.isAborting = true;
-	getBlob.abort(true);
+	this.abortController.abort();
 	try {
 		this.iframe.contentWindow.stop();
 	} catch (e) {

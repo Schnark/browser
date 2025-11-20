@@ -70,11 +70,12 @@ Options.prototype.getPrefs = function (url) {
 	return result;
 };
 
-Options.prototype.getOptions = function (url, noCache) {
+Options.prototype.getOptions = function (url, params) {
 	var prefs = this.getPrefs(url),
 		defaults = this.browser.getPageDefaults(url),
-		mainMode, embedCSS, embedHTML,
-		addCSS, addJS;
+		mainMode, embedCSS,
+		addCSS, addJS,
+		options;
 
 	if (prefs.cors && defaults.cors && (!prefs.cert || !defaults.cert)) {
 		prefs.proxyUrl = '';
@@ -85,8 +86,6 @@ Options.prototype.getOptions = function (url, noCache) {
 
 	mainMode = prefs.proxy ? 'proxy' : 'orig';
 	embedCSS = prefs.proxy || (!prefs.img || !prefs.font) || prefs.dark;
-	embedHTML = embedCSS ||
-		(defaults.responsive || !prefs.js || !prefs.css || !prefs.img || !prefs.media || prefs.manualMedia);
 
 	addJS = ['default.js'];
 	if (prefs.js) {
@@ -107,9 +106,9 @@ Options.prototype.getOptions = function (url, noCache) {
 		addCSS = addCSS || [];
 		addCSS.push('data:text/css;base64,' + btoa(prefs.additionalCSS));
 	}
-	return {
+	options = {
 		proxy: prefs.proxyUrl,
-		html: prefs.html ? (defaults.html || (embedHTML ? 'embed' : mainMode)) : 'none',
+		html: prefs.html ? (defaults.html || 'embed') : 'none',
 		js: prefs.js ? (defaults.js || mainMode) : 'none',
 		css: prefs.css ? (defaults.css || (embedCSS ? 'embed' : mainMode)) : 'none',
 		img: prefs.img ? (defaults.img || mainMode) : 'none',
@@ -123,12 +122,47 @@ Options.prototype.getOptions = function (url, noCache) {
 		dark: prefs.dark,
 		useIcon: prefs.useIcon,
 		context: defaults.context || {},
-		noCache: noCache
+		noCache: params.noCache,
+		cache: this.browser.cache
 	};
+
+	function embed (type) {
+		if (options[type] === 'orig' || options[type] === 'proxy') {
+			options[type] = 'embed';
+		}
+	}
+	if (params.cache) {
+		embed('css');
+		embed('js');
+		switch (params.cache[1]) {
+		case 0:
+			options.html = 'none';
+			options.img = 'none';
+			options.media = 'none';
+			options.font = 'none';
+			break;
+		case 1:
+			embed('html');
+			options.img = 'none';
+			options.media = 'none';
+			options.font = 'none';
+			break;
+		case 2:
+			embed('html');
+			embed('img');
+			options.media = 'none';
+			embed('font');
+		}
+		options.store = {add: 1, update: 2, remove: 0}[params.cache[0]];
+	}
+	return options;
 };
 
-Options.prototype.get = function (url, noCache) {
-	var options = this.getOptions(url, noCache);
+Options.prototype.get = function (url, params) {
+	var options = this.getOptions(url, params || {});
+	if (params && params.signal) {
+		options.signal = params.signal;
+	}
 	return this.getFiles(options.addJS).then(function (addJS) {
 		options.addJS = addJS;
 		if (options.addCSS) {

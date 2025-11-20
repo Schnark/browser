@@ -10,8 +10,8 @@ function isSpecialUrl (url) {
 	].indexOf(url.split(':')[0].toLowerCase()) === -1;
 }
 
-function modifyCSS (css, baseUrl, prefix, options, urls) {
-	urls = urls || [];
+function modifyCSS (css, baseUrl, prefix, options, res) {
+	res = res || {embed: [], live: 0};
 
 	function replaceUrl (url, type) {
 		var hashIndex, hash = '', mode, i;
@@ -39,18 +39,25 @@ function modifyCSS (css, baseUrl, prefix, options, urls) {
 		}
 
 		mode = options[type];
+		if (mode === 'orig' || mode === 'proxy') {
+			if (options.cache.has(url)) {
+				mode = 'embed';
+			} else {
+				res.live = Math.max(res.live, {img: 2, font: 2, css: 4}[type]);
+			}
+		}
 		switch (mode) {
 		case 'none': case 'inline': return 'about:invalid';
 		case 'orig': return url + hash;
 		case 'proxy': return options.proxy + url + hash;
 		}
 
-		i = urls.indexOf(url);
+		i = res.embed.indexOf(url);
 		if (i > -1) {
 			return prefix + i + hash;
 		}
-		urls.push(url);
-		return prefix + (urls.length - 1) + hash;
+		res.embed.push(url);
+		return prefix + (res.embed.length - 1) + hash;
 	}
 
 	css = css.replace(/(@namespace\s+(?:\S+\s+)?url)\(/ig, '$1['); //hide @namespace URLs
@@ -75,12 +82,12 @@ function modifyCSS (css, baseUrl, prefix, options, urls) {
 	}
 	return {
 		text: css,
-		urls: urls
+		res: res
 	};
 }
 
 function modifyHTML (doc, baseUrl, prefix, options) {
-	var urls = [],
+	var res = {embed: [], live: 0},
 		base,
 		els;
 
@@ -104,18 +111,25 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 		}
 
 		mode = options[type];
+		if (mode === 'orig' || mode === 'proxy') {
+			if (options.cache.has(url)) {
+				mode = 'embed';
+			} else {
+				res.live = Math.max(res.live, {media: 1, img: 2, html: 3, js: 4, css: 4}[type]);
+			}
+		}
 		switch (mode) {
 		case 'none': case 'inline': return 'about:invalid';
 		case 'orig': return url;
 		case 'proxy': return options.proxy + url;
 		}
 
-		i = urls.indexOf(url);
+		i = res.embed.indexOf(url);
 		if (i > -1) {
 			return prefix + i;
 		}
-		urls.push(url);
-		return prefix + (urls.length - 1);
+		res.embed.push(url);
+		return prefix + (res.embed.length - 1);
 	}
 
 	//fix base URL
@@ -168,12 +182,11 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 
 	//process embeded styles
 	[].forEach.call(doc.querySelectorAll('style'), function (style) {
-		var result = modifyCSS(style.textContent, baseUrl, prefix, options, urls);
+		var result = modifyCSS(style.textContent, baseUrl, prefix, options, res);
 		style.textContent = result.text;
 	});
 	[].forEach.call(doc.querySelectorAll('[style]'), function (el) {
-		var result;
-		result = modifyCSS(el.getAttribute('style'), baseUrl, prefix, options, urls);
+		var result = modifyCSS(el.getAttribute('style'), baseUrl, prefix, options, res);
 		el.setAttribute('style', result.text);
 	});
 
@@ -327,7 +340,7 @@ function modifyHTML (doc, baseUrl, prefix, options) {
 		});
 	}
 
-	return urls;
+	return res;
 }
 
 return {

@@ -3,6 +3,12 @@
 (function () {
 "use strict";
 
+var debugCache = {
+	has: function (/*url*/) {
+		return false;
+	}
+};
+
 function cssSimple () {
 	return [
 		'* {',
@@ -56,8 +62,10 @@ function htmlSimple (body, head) {
 function runCSSTests (tests, assert) {
 	assert.expect(tests.length);
 	tests.forEach(function (test) {
+		var options = test.options || {};
+		options.cache = debugCache;
 		assert.deepEqual(
-			modify.css(test.css, 'https://example.com/test.css', 'debug:', test.options || {}).text,
+			modify.css(test.css, 'https://example.com/test.css', 'debug:', options).text,
 			test.result,
 			test.name
 		);
@@ -75,8 +83,10 @@ function stringFromDoc (doc) {
 function runHTMLTests (tests, assert) {
 	assert.expect(tests.length);
 	tests.forEach(function (test) {
-		var doc = docFromString(test.html);
-		modify.html(doc, 'https://example.com/test.html', 'debug:', test.options || {});
+		var doc = docFromString(test.html),
+			options = test.options || {};
+		options.cache = debugCache;
+		modify.html(doc, 'https://example.com/test.html', 'debug:', options);
 		assert.deepEqual(
 			stringFromDoc(doc),
 			stringFromDoc(docFromString(test.result)), //normalize

@@ -5,6 +5,17 @@ getDoc =
 (function () {
 "use strict";
 
+function merge (a, b) {
+	var result = {};
+	Object.keys(a).forEach(function (key) {
+		result[key] = a[key];
+	});
+	Object.keys(b).forEach(function (key) {
+		result[key] = b[key];
+	});
+	return result;
+}
+
 function getType (data) {
 	var type, i;
 	if (data.error) {
@@ -16,12 +27,14 @@ function getType (data) {
 		type = type.slice(0, i).trim();
 	}
 	if (type === 'text/html') {
+	//TODO also XHTML?
 		return 'html';
 	}
 	if (type === 'text/css') {
 		return 'css';
 	}
 	if (type === 'text/plain') {
+	//TODO more?
 		return 'text';
 	}
 	return 'other';
@@ -66,6 +79,9 @@ function blobToText (blob) {
 			resolve(reader.result);
 		};
 		reader.readAsText(blob); //TODO encoding
+		//according to spec the browser should take care of
+		//BOM and parameter in mime
+		//but we still have to look for <meta charset> etc.
 	});
 }
 
@@ -86,11 +102,11 @@ function inlineUrls (data, prefix, options, track) {
 	return getDocs(data.urls, options, track).then(function (docs) {
 		var result = {
 			blobs: [],
-			cache: []
+			cache: {}
 		}, i;
 		for (i = 0; i < docs.length; i++) {
 			result.blobs = result.blobs.concat(docs[i].blobs);
-			result.cache = result.cache.concat(docs[i].cache);
+			result.cache = merge(result.cache, docs[i].cache);
 		}
 		result.text = data.text.replace(new RegExp(prefix + '(\\d+)', 'g'), function (all, i) {
 			return docs[i].content;
@@ -103,11 +119,11 @@ function getHTML (data, options, track) {
 	return blobToText(data.blob).then(function (html) {
 		var prefix = getPrefix(html),
 			doc = (new DOMParser()).parseFromString(html, 'text/html'),
-			urls,
+			res,
 			icon,
 			searchEngines;
 		//TODO optionally set data.url to canonical url, like <meta property="og:url" content=""> etc.
-		urls = modify.html(doc, data.url, prefix, options);
+		res = modify.html(doc, data.url, prefix, options);
 
 		icon = doc.querySelectorAll('link[rel~="icon"][href]');
 		if (icon.length) {
@@ -125,18 +141,18 @@ function getHTML (data, options, track) {
 		html = '\uFEFF' + (new XMLSerializer()).serializeToString(doc);
 		return inlineUrls({
 			text: html,
-			urls: urls
+			urls: res.embed
 		}, prefix, options, track).then(function (result) {
 			var file = getFile(
 				{
 					url: data.url,
 					hash: data.hash,
 					blob: new Blob([result.text], {type: 'text/html'}),
-					cache: data.cache
+					cache: merge(data.cache, res)
 				}, options
 			);
 			file.blobs = file.blobs.concat(result.blobs);
-			file.cache = file.cache.concat(result.cache);
+			file.cache = merge(file.cache, result.cache);
 			file.title = doc.title || file.title;
 			file.icon = icon || file.icon;
 			file.searchEngines = searchEngines;
@@ -147,19 +163,19 @@ function getHTML (data, options, track) {
 
 function getCSS (data, options, track) {
 	return blobToText(data.blob).then(function (css) {
-		var prefix = getPrefix(css), cssAndUrls;
-		cssAndUrls = modify.css(css, data.url, prefix, options);
-		return inlineUrls(cssAndUrls, prefix, options, track).then(function (result) {
+		var prefix = getPrefix(css), cssAndRes;
+		cssAndRes = modify.css(css, data.url, prefix, options);
+		return inlineUrls({text: cssAndRes.text, urls: cssAndRes.res.embed}, prefix, options, track).then(function (result) {
 			var file = getFile(
 				{
 					url: data.url,
 					hash: data.hash,
 					blob: new Blob([result.text], {type: 'text/css'}),
-					cache: data.cache
+					cache: merge(data.cache, cssAndRes.res)
 				}, options
 			);
 			file.blobs = file.blobs.concat(result.blobs);
-			file.cache = file.cache.concat(result.cache);
+			file.cache = merge(file.cache, result.cache);
 			return file;
 		});
 	});
@@ -208,7 +224,8 @@ function getError (data, options) {
 }
 
 function getFile (data) {
-	var blobUrl = URL.createObjectURL(data.blob);
+	var blobUrl = URL.createObjectURL(data.blob), cache = {};
+	cache[data.url] = data.cache;
 	return {
 		title: getTitleFromUrl(data.url),
 		url: data.url,
@@ -217,7 +234,7 @@ function getFile (data) {
 		searchEngines: [],
 		content: blobUrl,
 		blobs: [blobUrl],
-		cache: [data.cache]
+		cache: cache
 	};
 }
 
@@ -246,6 +263,7 @@ function getDoc (url, options, track) {
 			return getText(data, options);
 		case 'error':
 			return getError(data, options);
+		//TODO more? e.g. SVG
 		default:
 			return getFile(data, options);
 		}

@@ -1,6 +1,6 @@
 /*global Settings: true*/
-/*global getOSD*/
-/*global MozActivity, Event*/
+/*global getBlob, getDoc, getOSD, Cache*/
+/*global MozActivity, Event, URL*/
 Settings =
 (function () {
 "use strict";
@@ -222,6 +222,15 @@ Settings.prototype.init = function () {
 	this.el('offline-status-0').addEventListener('click', toggleOfflineInfo.bind(this));
 	this.el('offline-status-1').addEventListener('click', toggleOfflineInfo.bind(this));
 	this.el('offline-status-2').addEventListener('click', toggleOfflineInfo.bind(this));
+	this.el('offline-buttons').addEventListener('click', function (e) {
+		var dataset = e.target.dataset;
+		if (dataset.action) {
+			this.el('offline-buttons').textContent = 'Please wait …';
+			this.cache(dataset.action, this.browser.currentTab.url, Number(dataset.param)).then(function () {
+				this.el('offline-buttons').textContent = 'Cache updated';
+			}.bind(this));
+		}
+	}.bind(this));
 	//share buttons
 	if (supportsShare()) {
 		this.el('url-share').addEventListener('click', function () {
@@ -521,7 +530,7 @@ Settings.prototype.editSuggestions = function (edit) {
 
 Settings.prototype.show = function (noFocus) {
 	var url = this.browser.currentTab ? this.browser.currentTab.url : '',
-		history, isLoading, isBookmark, prefs;
+		history, isLoading, isBookmark, cacheInfo, prefs;
 	this.container.classList.add('visible');
 	this.titleContainer.classList.add('settings-shown');
 	this.hidden = false;
@@ -541,9 +550,16 @@ Settings.prototype.show = function (noFocus) {
 		isBookmark = this.browser.isBookmark(url);
 		this.el('bookmark-add').style.display = isBookmark ? 'none' : '';
 		this.el('bookmark-remove').style.display = isBookmark ? '' : 'none';
-		this.el('offline-status-0').style.display = '';
-		this.el('offline-status-1').style.display = 'none';
-		this.el('offline-status-2').style.display = 'none';
+		cacheInfo = Cache.getInfo(this.browser.currentTab.cache);
+		this.el('offline-status-0').style.display = cacheInfo.type === 0 ? '' : 'none';
+		this.el('offline-status-1').style.display = cacheInfo.type === 1 ? '' : 'none';
+		this.el('offline-status-2').style.display = cacheInfo.type === 2 ? '' : 'none';
+		this.el('offline-info').textContent = cacheInfo.text + (cacheInfo.dates ? ' ' + cacheInfo.dates : '');
+		this.el('offline-buttons').innerHTML = cacheInfo.buttons.map(function (button) {
+			return '<button data-action="' + button.action[0] + '" data-param="' + button.action[1] + '">' +
+				button.text + '</button>';
+		}).join(' ');
+		this.el('offline-debug').textContent = JSON.stringify(this.browser.currentTab.cache, null, '\t');
 		this.el('url-browse').disabled = !(/^https?:\/\//.test(url));
 	} else {
 		this.el('history-buttons').style.display = 'none';
@@ -599,6 +615,48 @@ Settings.prototype.installSearchEngine = function (url, button) {
 			}
 		}.bind(this));
 	}.bind(this));
+};
+
+Settings.prototype.cache = function (action, url, param) {
+	var browser = this.browser;
+
+	function modifyCache (cache) {
+		if (param === 0) {
+			url = cache[url].embed;
+		}
+		if (!url) {
+			return;
+		}
+		switch (action) {
+		case 'add': return browser.cache.add(url, cache);
+		case 'update': return browser.cache.update(url, cache);
+		case 'remove': return browser.cache.remove(url);
+		}
+	}
+
+	if (action === 'remove' && param > 0) {
+		return modifyCache();
+	}
+
+	return this.browser.options.get(url, {cache: [action, param]}).then(function (options) {
+		return getDoc(url, options).then(function (data) {
+			var i, cache;
+			for (i = 0; i < data.blobs.length; i++) {
+				URL.revokeObjectURL(data.blobs[i]);
+			}
+			cache = data.cache;
+			if (options.useIcon && data.icon) {
+				return getBlob(data.icon, options).then(function (iconData) {
+					cache[url].embed = cache[url].embed || [];
+					cache[url].embed.push(data.icon);
+					cache[data.icon] = iconData.cache;
+					return modifyCache(cache);
+				});
+			} else {
+				return modifyCache(cache);
+			}
+		});
+	});
 };
 
 return Settings;

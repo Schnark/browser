@@ -9,6 +9,7 @@
 <script src="res/options.js" defer></script>
 <script src="res/lru.js" defer></script>
 <script src="res/logger.js" defer></script>
+<script src="res/cache.js" defer></script>
 <script src="res/get-blob.js" defer></script>
 <script src="res/modify.js" defer></script>
 <script src="res/get-doc.js" defer></script>
@@ -61,7 +62,10 @@
 <div class="search-engines-install"></div>
 </div>
 <div class="offline-edit" hidden>
-<p>In a future version it will be possible to save pages for offline usage.</p>
+<p class="offline-info"></p>
+<p>In a future version it will be possible to save pages for offline usage, for now the cache is deleted when you close the browser, as it still may have bugs.</p>
+<p class="offline-buttons"></p>
+<pre class="offline-debug"></pre>
 </div>
 
 <form class="url-form"><p>

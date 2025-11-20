@@ -5,59 +5,93 @@ getBlob =
 (function () {
 "use strict";
 
-var lru = new LRU(10),
-	currentXHR = {},
-	isAborting = false;
+var lru = new LRU(10);
 
-//TODO allow durable offline caching
-//use the cache key for details
+function getAboutCache (data) {
+	function dataToList (data) {
+		if (data.length === 0) {
+			return '<p>none</p>';
+		}
+		return '<ul>' + data.map(function (entry) {
+			var url = entry[0],
+				date = (new Date(entry[1])).toDateString();
+			return '<li><a href="' + url.replace(/"/g, '&quot;') + '">' +
+				url.replace(/</g, '&lt;') + '</a> (' + date.replace(/</g, '&lt;') + ')</li>';
+		}).join('\n') + '</ul>';
+	}
 
-function getAbout (url) {
+	return [
+		'<!DOCTYPE html>',
+		'<html lang="en"><head>',
+		'<meta charset="utf-8">',
+		'<title>SparrowSurf Cache</title>',
+		'<style>',
+		'html {',
+			'font: 16px sans-serif;',
+		'}',
+		'@media (prefers-color-scheme: dark) {',
+			'html {',
+				'color: #fff;',
+				'background: #333;',
+			'}',
+		'}',
+		'</style>',
+		'</head><body>',
+		'<h1>SparrowSurf Cache</h1>',
+		'<h2>Main resources</h2>',
+		dataToList(data[0]),
+		'<h2>Other resources</h2>',
+		dataToList(data[1]),
+		'</body></html>'
+	].join('\n');
+}
+
+function getAbout (url, options) {
 	switch (url) {
 	case 'about:blank':
-		return Promise.resolve({
-			data: '<!DOCTYPE html><html></html>',
-			type: 'text/html'
-		});
+		return Promise.resolve(
+			new Blob(['<!DOCTYPE html><html></html>'], {type: 'text/html'})
+		);
 	case 'about:log':
 		Promise.resolve().then(function () {
 			lru.remove(url);
 		});
-		return Promise.resolve({
-			data: logger.get(),
-			type: 'text/plain'
-		});
+		return Promise.resolve(
+			new Blob([logger.get()], {type: 'text/plain'})
+		);
+	case 'about:cache':
+		return Promise.resolve(
+			new Blob([getAboutCache(options.cache.getLists())], {type: 'text/html'})
+		);
 	case 'about:slow':
 		return new Promise(
 			function (resolve) {
-				currentXHR[url] = {
-					abort: function () {
-						delete currentXHR[url];
+				if (options.signal) {
+					options.signal.addEventListener('abort', function () {
 						lru.remove(url);
+						logger.log('ERROR', url);
 						resolve();
-					}
-				};
-				window.setTimeout(function () {
-					delete currentXHR[url];
-					resolve({
-						data: 'This page takes 5 seconds to load.',
-						type: 'text/plain'
 					});
+				}
+				window.setTimeout(function () {
+					resolve(
+						new Blob(['This page takes 5 seconds to load.'], {type: 'text/plain'})
+					);
 				}, 5000);
 			}
 		);
 	case 'about:icon':
-		return getUrl('res/icons/icon128.png', 'image/png');
+		return getUrl('res/icons/icon128.png', options);
 	case 'about:help':
-		return getUrl('res/modules/about/help.html', 'text/html');
+		return getUrl('res/modules/about/help.html', options);
 	default:
 		return Promise.resolve();
 	}
 }
 
-function getUrl (url, type, timeout) {
+function getUrl (url, options) {
 	if (url.slice(0, 6) === 'about:') {
-		return getAbout(url);
+		return getAbout(url, options);
 	}
 	return new Promise(function (resolve) {
 		var xhr = new XMLHttpRequest();
@@ -66,27 +100,42 @@ function getUrl (url, type, timeout) {
 		xhr.responseType = 'arraybuffer';
 
 		function onError () {
-			delete currentXHR[url];
 			lru.remove(url);
 			logger.log('ERROR', url);
 			resolve();
 		}
 
-		if (timeout) {
-			xhr.timeout = timeout;
+		if (options.timeout) {
+			xhr.timeout = options.timeout;
 		}
 		xhr.onload = function () {
-			delete currentXHR[url];
+			var type, blobOptions;
 			logger.log('SUCCESS', url);
-			resolve({
-				data: xhr.response,
-				type: type || xhr.getResponseHeader('Content-Type')
-			});
+			type = xhr.getResponseHeader('Content-Type');
+			if (!type || type === 'application/xml') {
+				if (/\.html?(\?|$)/i.test(url)) {
+					type = 'text/html';
+				} else if (/\.js(\?|$)/i.test(url)) {
+					type = 'text/javascript';
+				} else if (/\.css(\?|$)/i.test(url)) {
+					type = 'text/css';
+				} else if (/\.xml(\?|$)/i.test(url)) {
+					type = 'application/xml';
+				} else {
+					type = '';
+				}
+			}
+			blobOptions = type ? {type: type} : {};
+			resolve(new Blob([xhr.response], blobOptions));
 		};
 		xhr.onerror = onError;
 		xhr.onabort = onError;
 		xhr.ontimeout = onError;
-		currentXHR[url] = xhr;
+		if (options.signal) {
+			options.signal.addEventListener('abort', function () {
+				xhr.abort();
+			});
+		}
 		try {
 			xhr.send();
 		} catch (e) {
@@ -95,22 +144,46 @@ function getUrl (url, type, timeout) {
 	});
 }
 
-function getUrlWithCache (url, nocache, timeout) {
+function getUrlWithLRU (url, options) {
 	var result;
-	if (!nocache) {
+	if (!options.noCache) {
 		result = lru.get(url);
 		if (result) {
 			logger.log('LRU', url);
 			return result;
 		}
 	}
-	if (isAborting) {
+	if (options.signal && options.signal.aborted) {
 		logger.log('SKIP', url);
 		return Promise.resolve();
 	}
-	result = getUrl(url, null, timeout);
+	result = getUrl(url, options);
 	lru.set(url, result);
 	return result;
+}
+
+function prepareBlob (blob, meta) {
+	if (meta.store) {
+		meta.cache.blob = blob || new Blob([], {type: 'text/plain'});
+	}
+	if (!blob) {
+		return {
+			url: meta.url,
+			hash: meta.hash,
+			blob: new Blob([], {type: 'text/plain'}),
+			cache: meta.cache,
+			error: true
+		};
+	}
+	if (meta.viewsource) {
+		blob = new Blob([blob], {type: 'text/plain'});
+	}
+	return {
+		url: meta.url,
+		hash: meta.hash,
+		blob: blob,
+		cache: meta.cache
+	};
 }
 
 function getBlob (url, options) {
@@ -125,59 +198,34 @@ function getBlob (url, options) {
 		viewsource = true;
 		xhrUrl = xhrUrl.slice(12);
 	}
+	if (options.store !== 2 && options.cache.has(xhrUrl)) {
+		logger.log('CACHE', xhrUrl);
+		return options.cache.getBlob(xhrUrl).then(function (blob) {
+			var meta = options.cache.getMeta(xhrUrl);
+			return prepareBlob(blob, {
+				url: url, //TODO meta.url?
+				hash: hash,
+				cache: {d: meta.d},
+				viewsource: viewsource
+			});
+		});
+	}
 	if (xhrUrl.slice(0, 7) === 'http://' || xhrUrl.slice(0, 8) === 'https://') {
 		xhrUrl = options.proxy + xhrUrl;
 	}
-	return getUrlWithCache(xhrUrl, options.noCache, options.timeout).then(function (result) {
-		var type, blobOptions;
-		if (!result) {
-			return {
-				url: url,
+	return getUrlWithLRU(xhrUrl, options).then(function (blob) {
+		return prepareBlob(
+			blob,
+			{
+				url: url, //TODO redirects
 				hash: hash,
-				blob: new Blob([], {type: 'text/plain'}),
-				cache: false,
-				error: true
-			};
-		}
-		type = result.type;
-		if (!type || type === 'application/xml') {
-			if (/\.html?(\?|$)/i.test(url)) {
-				type = 'text/html';
-			} else if (/\.js(\?|$)/i.test(url)) {
-				type = 'text/javascript';
-			} else if (/\.css(\?|$)/i.test(url)) {
-				type = 'text/css';
-			} else if (/\.xml(\?|$)/i.test(url)) {
-				type = 'application/xml';
-			} else {
-				type = '';
+				cache: {d: -1},
+				viewsource: viewsource,
+				store: options.store
 			}
-		}
-		if (viewsource) {
-			type = 'text/plain';
-		}
-		blobOptions = type ? {type: type} : {};
-		return {
-			url: url, //TODO redirects
-			hash: hash,
-			blob: new Blob([result.data], blobOptions),
-			cache: false
-		};
+		);
 	});
 }
-
-function setAbort (abort) {
-	//TODO allow selective aborting
-	isAborting = abort;
-	if (abort) {
-		logger.log('ABORT', '');
-		Object.keys(currentXHR).forEach(function (url) {
-			currentXHR[url].abort();
-		});
-	}
-}
-
-getBlob.abort = setAbort;
 
 return getBlob;
 })();

@@ -1,5 +1,5 @@
 /*global Browser: true*/
-/*global Storage, Options, ContextMenu, getBlob, Tab, Settings, Modules, MODULES*/
+/*global Storage, Cache, Options, ContextMenu, getBlob, Tab, Settings, Modules, MODULES*/
 /*global URL*/
 Browser =
 (function () {
@@ -18,6 +18,7 @@ function Browser (container) {
 	this.tabs = [];
 	this.currentTab = null;
 	this.storage = new Storage('sparrow-surf-');
+	this.cache = new Cache(); //TODO
 	this.loadPrefs();
 	this.loadBookmarksHistory();
 	this.options = new Options(this);

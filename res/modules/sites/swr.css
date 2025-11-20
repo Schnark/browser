@@ -49,3 +49,13 @@ ul.interaction-bar {
 .quote .quote-blockquote p::before {
   content: "”";
 }
+
+/*original has "none" and adds day via :has(abbr[title="..."]) selector*/
+.teaser-broadcast .broadcastinfo .date abbr, .teaser-broadcast .eventinfo-date abbr, .teaser-event .broadcastinfo .date abbr, .teaser-event .eventinfo-date abbr, aside.broadcastfurther dd time abbr, aside.broadcastinfo dd time abbr {
+	display: inline;
+}
+x-does-not-exist:has(x-does-not-exist),
+.teaser-broadcast .broadcastinfo .date abbr, .teaser-broadcast .eventinfo-date abbr, .teaser-event .broadcastinfo .date abbr, .teaser-event .eventinfo-date abbr, aside.broadcastfurther dd time abbr, aside.broadcastinfo dd time abbr {
+	display: none;
+}
+
