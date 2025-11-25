@@ -21,8 +21,9 @@ function Tab (browser, container0, container1) {
 	this.hide();
 	this.url = '';
 	this.title = 'New tab';
+	this.isHTML = false;
 	this.searchEngines = [];
-	this.cache = [];
+	this.cache = {};
 	this.objectUrls = [];
 	this.abortController = new AbortController();
 	this.isLoading = false;
@@ -137,6 +138,7 @@ Tab.prototype.loadUrl = function (url, noHistory, noCache) {
 			this.setTitle(data.title);
 			this.setContent(data.content /*+ data.hash*/);
 			this.url = data.url + data.hash;
+			this.isHTML = data.isHTML;
 			this.searchEngines = data.searchEngines;
 			this.context = options.context;
 			this.cache = data.cache;

@@ -1,6 +1,5 @@
 * zoom
 * page search
-* allow saving pages offline
 * build some pages from an API (e.g. Wikipedia)
 * add more CSS for important sites
 * include DevDocs

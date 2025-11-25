@@ -163,16 +163,18 @@ Options.prototype.get = function (url, params) {
 	if (params && params.signal) {
 		options.signal = params.signal;
 	}
-	return this.getFiles(options.addJS).then(function (addJS) {
-		options.addJS = addJS;
-		if (options.addCSS) {
-			return this.getFiles(options.addCSS).then(function (addCSS) {
-				options.addCSS = addCSS;
+	return options.cache.init.then(function () {
+		return this.getFiles(options.addJS).then(function (addJS) {
+			options.addJS = addJS;
+			if (options.addCSS) {
+				return this.getFiles(options.addCSS).then(function (addCSS) {
+					options.addCSS = addCSS;
+					return options;
+				});
+			} else {
 				return options;
-			});
-		} else {
-			return options;
-		}
+			}
+		}.bind(this));
 	}.bind(this));
 };
 

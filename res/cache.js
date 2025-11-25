@@ -1,4 +1,5 @@
 /*global Cache: true*/
+/*global Database*/
 /*global Promise*/
 Cache =
 (function () {
@@ -6,7 +7,8 @@ Cache =
 
 function Cache (key) {
 	this.key = key;
-	this.data = {}; //TODO load if key
+	this.data = {};
+	this.init = this.runInit();
 	this.blobs = {};
 }
 
@@ -188,6 +190,16 @@ Cache.getInfo = function (data) {
 	};
 };
 
+Cache.prototype.runInit = function () {
+	if (!this.key) {
+		return Promise.resolve();
+	}
+	this.db = new Database(this.key);
+	return this.db.get('').then(function (data) {
+		this.data = data || {};
+	}.bind(this));
+};
+
 Cache.prototype.has = function (url) {
 	return !!this.data[url];
 };
@@ -208,8 +220,7 @@ Cache.prototype.getBlob = function (url) {
 	if (!this.key) {
 		return Promise.resolve(this.blobs[url]);
 	}
-	//TODO
-	return Promise.reject();
+	return this.db.get(url);
 };
 
 Cache.prototype.setBlob = function (url, blob) {
@@ -225,8 +236,18 @@ Cache.prototype.commit = function () {
 		}.bind(this));
 		return Promise.resolve();
 	}
-	//TODO
-	return Promise.reject();
+	this.blobs[''] = this.data;
+	return this.db.update(this.blobs).then(function () {
+		this.blobs = {};
+	}.bind(this), function (e) {
+		this.blobs = {};
+		//restore old data
+		return this.db.get('').then(function (data) {
+			this.data = data || {};
+		}.bind(this)).then(function () {
+			return Promise.reject(e);
+		});
+	}.bind(this));
 };
 
 Cache.prototype.getLists = function () {

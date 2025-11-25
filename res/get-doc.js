@@ -37,6 +37,7 @@ function getType (data) {
 	//TODO more?
 		return 'text';
 	}
+	//TODO images? (for context menu)
 	return 'other';
 }
 
@@ -156,6 +157,7 @@ function getHTML (data, options, track) {
 			file.title = doc.title || file.title;
 			file.icon = icon || file.icon;
 			file.searchEngines = searchEngines;
+			file.isHTML = true;
 			return file;
 		});
 	});
@@ -202,6 +204,7 @@ function getText (data, options) {
 			'<style>',
 			css,
 			'</style>',
+			'<script src="' + options.addJS[0] + '"></script>',
 			'</head><body>',
 			'<pre>',
 			text.replace(/</g, '&lt;'),

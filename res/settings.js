@@ -58,7 +58,7 @@ function initSuggestor (input, select) {
 	select.addEventListener('change', function () {
 		if (select.value) {
 			input.value = select.value;
-			input.dispatchEvent(new Event('input'));
+			input.dispatchEvent(new Event('change', {bubbles: true}));
 			input.style.display = 'none';
 		} else {
 			input.style.display = '';
@@ -223,12 +223,14 @@ Settings.prototype.init = function () {
 	this.el('offline-status-1').addEventListener('click', toggleOfflineInfo.bind(this));
 	this.el('offline-status-2').addEventListener('click', toggleOfflineInfo.bind(this));
 	this.el('offline-buttons').addEventListener('click', function (e) {
-		var dataset = e.target.dataset;
+		var dataset = e.target.dataset, area = this.el('offline-buttons');
 		if (dataset.action) {
-			this.el('offline-buttons').textContent = 'Please wait …';
+			area.textContent = 'Please wait …';
 			this.cache(dataset.action, this.browser.currentTab.url, Number(dataset.param)).then(function () {
-				this.el('offline-buttons').textContent = 'Cache updated';
-			}.bind(this));
+				area.textContent = 'Cache updated';
+			}, function () {
+				area.textContent = 'An error occurred while updating the cache.';
+			});
 		}
 	}.bind(this));
 	//share buttons
@@ -559,7 +561,6 @@ Settings.prototype.show = function (noFocus) {
 			return '<button data-action="' + button.action[0] + '" data-param="' + button.action[1] + '">' +
 				button.text + '</button>';
 		}).join(' ');
-		this.el('offline-debug').textContent = JSON.stringify(this.browser.currentTab.cache, null, '\t');
 		this.el('url-browse').disabled = !(/^https?:\/\//.test(url));
 	} else {
 		this.el('history-buttons').style.display = 'none';

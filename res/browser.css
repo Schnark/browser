@@ -208,6 +208,10 @@ select {
 	margin: -1px -0.5em 0;
 }
 
+.offline-edit button {
+	margin: 0.2em;
+}
+
 input.url-input {
 	font: inherit;
 	width: calc(100% - 2em);

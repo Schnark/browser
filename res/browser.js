@@ -18,7 +18,7 @@ function Browser (container) {
 	this.tabs = [];
 	this.currentTab = null;
 	this.storage = new Storage('sparrow-surf-');
-	this.cache = new Cache(); //TODO
+	this.cache = new Cache('sparrow-surf-cache');
 	this.loadPrefs();
 	this.loadBookmarksHistory();
 	this.options = new Options(this);
@@ -455,10 +455,18 @@ Browser.prototype.onMessage = function (data) {
 			});
 		}
 	});
-	contextMenuEntries.push({
-		text: 'Show HTML source',
-		url: 'view-source:' + currentUrl
-	});
+	if (this.currentTab.isHTML) {
+		contextMenuEntries.push({
+			text: 'Show HTML source',
+			url: 'view-source:' + currentUrl
+		});
+	} else {
+		contextMenuEntries.push({
+			text: 'Download file',
+			url: currentUrl,
+			download: true
+		});
+	}
 	this.showContextMenu(contextMenuEntries, function (data) {
 		if (data.download) {
 			this.download(data.url);

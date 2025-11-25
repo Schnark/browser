@@ -45,6 +45,18 @@ ul.interaction-bar {
 #playerbar,.frontmod-schnellanmeldebox,body{--sds-number-article-typo-topline:0.875rem;--sds-number-article-typo-headline:1.75rem;--sds-number-article-typo-leadtext:1.125rem;--sds-number-article-typo-quote:1.25rem;--sds-number-article-typo-copy:1.125rem;--sds-number-article-typo-h2:1.5rem;--sds-number-article-typo-h3:1.25rem;--sds-number-article-typo-h4:1.125rem;--sds-number-article-typo-info-1:1rem;--sds-number-article-typo-info-2:0.875rem;--sds-number-article-spacing-between-elements:24px;--sds-number-article-typo-linkbox:1rem}
 }
 
+/*original has height: 0 and postition: absolute and some complicated code to correct the height via padding*/
+.bodytext figure[data-aspectratio]:not([data-aspectratio="icon"]):not([data-aspectratio="Detail"]) .image,
+.episode-cover .image,
+.mediagallery figure[data-aspectratio]:not([data-aspectratio="icon"]):not([data-aspectratio="Detail"]) .image {
+	height: auto;
+}
+.bodytext figure[data-aspectratio]:not([data-aspectratio="icon"]):not([data-aspectratio="Detail"]) .image img,
+.episode-cover .image img,
+.mediagallery figure[data-aspectratio]:not([data-aspectratio="icon"]):not([data-aspectratio="Detail"]) .image img {
+	position: static;
+}
+
 /*original with character from PUA*/
 .quote .quote-blockquote p::before {
   content: "”";
