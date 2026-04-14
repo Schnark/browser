@@ -163,14 +163,19 @@ function getUrlWithLRU (url, options) {
 }
 
 function prepareBlob (blob, meta) {
+	var error;
 	if (meta.store) {
 		meta.cache.blob = blob || new Blob([], {type: 'text/plain'});
 	}
 	if (!blob) {
+		error = [];
+		if (!navigator.onLine) {
+			error = ['You are offline and the page is not cached.'];
+		}
 		return {
 			url: meta.url,
 			hash: meta.hash,
-			blob: new Blob([], {type: 'text/plain'}),
+			blob: new Blob(error, {type: 'text/plain'}),
 			cache: meta.cache,
 			error: true
 		};

@@ -12,7 +12,8 @@ MODULES = [
 	},
 	{
 		apply: '*.github.io',
-		cors: true
+		cors: true,
+		cert: true
 	},
 	{
 		apply: 'developer.mozilla.org',
@@ -26,7 +27,8 @@ MODULES = [
 	},
 	{
 		apply: 'www.tagesschau.de',
-		cors: true
+		cors: true,
+		cert: true
 	},
 	{
 		apply: 'www.vatican.va',
